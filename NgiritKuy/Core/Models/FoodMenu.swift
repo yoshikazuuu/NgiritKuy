@@ -20,6 +20,7 @@ final class FoodMenu {
     var dietType: String
     var menuType: MenuType
     var stall: Stall?
+    var isFavorite: Bool = false
     
     init(
         id: UUID = UUID(),
@@ -30,7 +31,8 @@ final class FoodMenu {
         type: [String],
         dietType: String,
         menuType: MenuType,
-        stall: Stall? = nil
+        stall: Stall? = nil,
+        isFavorite: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -41,6 +43,7 @@ final class FoodMenu {
         self.dietType = dietType
         self.menuType = menuType
         self.stall = stall
+        self.isFavorite = isFavorite
     }
 }
 

@@ -44,67 +44,51 @@ struct DetailStall: View {
                     HStack {
                         Image(systemName: "mappin.and.ellipse")
                             .foregroundStyle(.red)
-                        Text(stall.area?.name ?? "")
+                        Text(stall.area?.name ?? "Unknown area")
                             .font(.subheadline)
                     }
 
                     Text(stall.desc)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
                         .font(.footnote)
                         .foregroundColor(.gray)
 
                 }
                 .padding()
 
-                // Price Summary
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack {
-                        VStack {
-                            Text("Min:")
-                                .fontWeight(.bold)
-                            Text("Rp\(stall.minimumPrice)")
+                // Price info
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Price")
+                        .font(.headline)
 
-                        }
-                        Spacer()
-                        VStack {
-                            Text("Avg:")
-                                .fontWeight(.bold)
-                            Text("Rp\(stall.averagePrice)")
-                        }
-                        Spacer()
-                        VStack {
-                            Text("Max:")
-                                .fontWeight(.bold)
-                            Text("Rp\(stall.maximumPrice)")
-                        }
+                    HStack(spacing: 16) {
+                        PriceTag(
+                            label: "Min", price: stall.minimumPrice,
+                            color: .green)
+
+                        PriceTag(
+                            label: "Avg", price: stall.averagePrice,
+                            color: .blue)
+
+                        PriceTag(
+                            label: "Max", price: stall.maximumPrice,
+                            color: .orange)
+
                     }
-                    .font(.subheadline)
-                    .padding(.horizontal)
                 }
                 .padding(.horizontal)
 
                 Divider()
 
-                // Menu Section
-                Text("Menu")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .padding(.horizontal)
-
-                ForEach(stall.menu) { menu in
-                    MenuItemRow(menu: menu)
-                }
-
-                Divider()
-                    .padding(.vertical)
-                VStack(spacing: 0) {
-
+                VStack(spacing: 8) {
                     Button(action: {
                         isMarked.toggle()
                     }) {
                         HStack {
-                            Image(systemName: "checkmark.circle")
+                            Image(
+                                systemName: isMarked
+                                    ? "checkmark.circle.fill"
+                                    : "checkmark.circle"
+                            )
                             Text(isMarked ? "Visited" : "Mark as Visited")
                                 .fontWeight(.medium)
                         }
@@ -114,8 +98,8 @@ struct DetailStall: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                     }
-
                     .padding(.horizontal)
+
                     Button {
                     } label: {
                         HStack {
@@ -125,62 +109,61 @@ struct DetailStall: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.white)
                         .foregroundColor(.blue)
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
                                 .stroke(Color.blue)
                         )
                     }
-                    .padding()
+                    .padding(.horizontal)
                 }
+
+                Divider()
+
+                // Menu Section
+                Text("Menu")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .padding(.horizontal)
+
+                ForEach(
+                    sortedMenu
+                ) { menu in
+                    MenuItemRow(menu: menu) {
+                        toggleFavorite(for: menu.id)
+                    }
+                    .padding(.bottom, 2)  // Add small spacing between rows
+                }
+
             }
         }
         .navigationTitle(stall.name)
         .navigationBarTitleDisplayMode(.inline)
     }
-}
 
-//menu component
-struct MenuItemRow: View {
-    let menu: FoodMenu
-
-    var body: some View {
-        HStack {
-            if let imageData = menu.image,
-                let uiImage = UIImage(data: imageData)
-            {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 70, height: 70)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+    // Computed property for the sorted menu.
+    private var sortedMenu: [FoodMenu] {
+        stall.menu.sorted { item1, item2 in
+            if item1.isFavorite != item2.isFavorite {
+                return item1.isFavorite
             } else {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 70, height: 70)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay {
-                        Image(systemName: "fork.knife")
-                            .foregroundStyle(.gray)
-                    }
+                return item1.price < item2.price
             }
-            VStack(alignment: .leading, spacing: 5) {
-                Text(menu.name)
-                    .font(.headline)
-                Text(menu.desc)
-                    .font(.footnote)
-                    .foregroundColor(.gray)
-                    .lineLimit(2)
-                Text("\(Int(menu.price))")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-            }
-            .padding(.leading, 10)
-
-            Spacer()
         }
-        .padding(.horizontal)
-        .padding(.vertical, 5)
+    }
+
+    // Function to toggle the favorite status for a specific menu item
+    private func toggleFavorite(for menuID: UUID) {
+        // Find the index of the menu item within the original stall.menu array
+        if let index = stall.menu.firstIndex(where: { $0.id == menuID }) {
+            // Perform the state change that triggers the UI update
+            // Wrap the state change in withAnimation
+            withAnimation(.spring()) {  // Use .default or customize (e.g., .spring())
+                stall.menu[index].isFavorite.toggle()
+                // The @Binding automatically propagates this change back to the parent's state
+                // The .animation modifier on ForEach observes the change in `sortedMenu`
+                // caused by this state update and animates the transition.
+            }
+        }
     }
 }

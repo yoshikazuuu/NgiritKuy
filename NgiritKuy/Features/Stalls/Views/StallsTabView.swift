@@ -7,8 +7,7 @@
 
 import SwiftData
 import SwiftUI
-// Assuming GameCenterManager and GameCenterAchievementsView are defined elsewhere
-// import GameKit
+import CoreLocation
 
 struct StallView: View {
     @Environment(\.modelContext) private var modelContext
@@ -73,5 +72,16 @@ struct StallView: View {
         //         }
         //     }
         // }
+    }
+    
+    private func calculateDistance(from userLocation: CLLocation, to stall: Stall) -> Double? {
+        guard let stallArea = stall.area,
+              let latitude = stallArea.latitude,
+              let longitude = stallArea.longitude else {
+            return nil
+        }
+        
+        let stallLocation = CLLocation(latitude: latitude, longitude: longitude)
+        return userLocation.distance(from: stallLocation)
     }
 }

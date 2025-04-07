@@ -28,19 +28,19 @@ enum PriceRange: Int, CaseIterable, Identifiable {
     var min: Double {
         switch self {
         case .range0to5k: return 0
-        case .range5to10k: return 5_000
-        case .range10to15k: return 10_000
-        case .range15to20k: return 15_000
-        case .range20kPlus: return 20_000
+        case .range5to10k: return 5
+        case .range10to15k: return 10
+        case .range15to20k: return 15
+        case .range20kPlus: return 20
         }
     }
     
     var max: Double {
         switch self {
-        case .range0to5k: return 5_000
-        case .range5to10k: return 10_000
-        case .range10to15k: return 15_000
-        case .range15to20k: return 20_000
+        case .range0to5k: return 5
+        case .range5to10k: return 10
+        case .range10to15k: return 15
+        case .range15to20k: return 20
         case .range20kPlus: return Double.infinity
         }
     }
