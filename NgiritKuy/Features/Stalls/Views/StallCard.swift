@@ -11,29 +11,40 @@ struct StallCard: View {
     let stall: Stall
     @Environment(\.modelContext) private var modelContext
 
+    // Calculate the width of the image
+    private let totalHorizontalPadding: CGFloat = 20 * 2
+    private let imageHeight: CGFloat = 120
+
     var body: some View {
         VStack(alignment: .leading) {
-            if let imageData = stall.image,
-                let uiImage = UIImage(data: imageData)
-            {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(4 / 3, contentMode: .fill)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 250)
-                    .clipped()
-            } else {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .aspectRatio(4 / 3, contentMode: .fill)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 250)
-                    .overlay {
-                        Image(systemName: "photo")
-                            .font(.system(size: 50))
-                            .foregroundStyle(.gray)
-                    }
+            ZStack(alignment: .topTrailing) {
+                if let imageData = stall.image,
+                    let uiImage = UIImage(data: imageData)
+                {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: .infinity, height: imageHeight)
+                        .clipped()
+                        .clipShape(
+                            RoundedRectangle(
+                                cornerRadius: 12, style: .continuous))
+                } else {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: .infinity, height: imageHeight)
+                        .clipShape(
+                            RoundedRectangle(
+                                cornerRadius: 12, style: .continuous)
+                        )
+                        .overlay {
+                            Image(systemName: "fork.knife")
+                                .font(.system(size: 30))
+                                .foregroundStyle(.gray)
+                        }
+                }
             }
+
             VStack(alignment: .leading) {
                 HStack {
                     Text(stall.name)
@@ -41,17 +52,15 @@ struct StallCard: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(1)
                     Spacer()
-                    //                    Button(action: {
-                    //                        if likedProductIDs.contains(product.id) {
-                    //                            likedProductIDs.remove(product.id)
-                    //                        } else {
-                    //                            likedProductIDs.insert(product.id)
-                    //                        }
-                    //                        print(likedProductIDs)
-                    //                    }) {
-                    //                        Image(systemName: likedProductIDs.contains(product.id) ? "heart.fill" : "heart")
-                    //                            .foregroundStyle(.red)
-                    //                    }
+                    Button(action: {
+                        stall.isFavorite.toggle()
+                    }) {
+                        Image(
+                            systemName: stall.isFavorite
+                                ? "heart.fill" : "heart"
+                        )
+                        .foregroundStyle(.red)
+                    }
 
                 }
                 VStack(alignment: .leading) {

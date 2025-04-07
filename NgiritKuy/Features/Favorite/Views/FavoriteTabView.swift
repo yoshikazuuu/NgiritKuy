@@ -6,24 +6,26 @@
 //
 
 import Foundation
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct FavoritesView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var stalls: [Stall]
+    @Query(filter: #Predicate<Stall> { stall in
+        stall.isFavorite
+    }) var favoritedStalls: [Stall]
     @Query private var areas: [GOPArea]
-    
+
     let columns = [
         GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
+        GridItem(.flexible(), spacing: 16),
     ]
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(stalls) { stall in
+                    ForEach(favoritedStalls) { stall in
                         NavigationLink(destination: DetailStall(stall: stall)) {
                             StallCard(stall: stall)
                         }
