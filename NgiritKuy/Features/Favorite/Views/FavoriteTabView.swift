@@ -1,5 +1,5 @@
 //
-//  StallsTabView.swift
+//  FavoriteTabView.swift
 //  NgiritKuy
 //
 //  Created by Jerry Febriano on 07/04/25.
