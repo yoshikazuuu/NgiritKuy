@@ -45,7 +45,6 @@ struct MenuItemRow: View {
                 Text("\(Int(menu.price)).000")
                     .font(.headline)
                     .fontWeight(.bold)
-                    .foregroundStyle(.accent)
                 Button(action: onToggleFavorite) {
                     Image(systemName: menu.isFavorite ? "heart.fill" : "heart")
                         .foregroundStyle(.red)

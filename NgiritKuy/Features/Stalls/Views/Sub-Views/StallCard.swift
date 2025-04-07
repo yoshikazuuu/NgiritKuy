@@ -10,6 +10,7 @@ import CoreLocation
 
 struct StallCard: View {
     let stall: Stall
+    @Environment(\.colorScheme) var colorScheme
     @Environment(\.modelContext) private var modelContext
     @StateObject private var locationManager = LocationManager()
     @State private var distance: String = "Calculating..."
@@ -82,7 +83,11 @@ struct StallCard: View {
             }
             .padding(10)
         }
-        .background(.background)
+        .background(
+            colorScheme == .dark
+            ? Color(.secondarySystemBackground)
+            : Color.white
+        )
         .cornerRadius(12)
         .shadow(radius: 3)
         .onAppear {
