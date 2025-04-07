@@ -10,6 +10,8 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    
+    @StateObject private var gameCenter = GameCenterManager.shared
 
     var body: some View {
         TabView {
@@ -24,7 +26,10 @@ struct ContentView: View {
                 }
             
         }
-
+        .onAppear {
+            // Authenticate to use game center
+            gameCenter.authenticatePlayer()
+        }
     }
 }
 
