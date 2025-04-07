@@ -24,7 +24,7 @@ struct StallCard: View {
                     Image(uiImage: uiImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: .infinity, height: imageHeight)
+                        .frame(height: imageHeight)
                         .clipped()
                         .clipShape(
                             RoundedRectangle(
