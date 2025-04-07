@@ -9,8 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct StallView: View {
-    let products: [Product]
-    @Binding var likedProductIDs: Set<UUID>
+    @Environment(\.modelContext) private var modelContext
+    @Query private var stalls: [Stall]
+    @Query private var areas: [GOPArea]
     
     let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -21,9 +22,9 @@ struct StallView: View {
         NavigationStack {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(products) { product in
-                        NavigationLink(destination: DetailStall(stall: product)) {
-                            StallCard(product: product, likedProductIDs: $likedProductIDs)
+                    ForEach(stalls) { stall in
+                        NavigationLink(destination: DetailStall(stall: stall)) {
+                            StallCard(stall: stall)
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
@@ -34,13 +35,4 @@ struct StallView: View {
             .navigationTitle("NgiritKuy")
         }
     }
-}
-
-#Preview {
-    StallView(
-        products: [
-            Product(image: "stall", title: "Stall", price: 15000, category: "Preview", location: "Preview", menus: [])
-        ],
-        likedProductIDs: .constant([])
-    )
 }

@@ -7,27 +7,33 @@
 
 import Foundation
 import SwiftUI
+import SwiftData
 
 struct FavoritesView: View {
-    let products: [Product]
-    @Binding var likedProductIDs: Set<UUID>
-
-    var likedProducts: [Product] {
-        products.filter { likedProductIDs.contains($0.id) }
-    }
-
+    @Environment(\.modelContext) private var modelContext
+    @Query private var stalls: [Stall]
+    @Query private var areas: [GOPArea]
+    
+    let columns = [
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16)
+    ]
+    
     var body: some View {
-        List(likedProducts) { product in
-            HStack {
-                Text(product.title)
-                Spacer()
-                Button(action: {
-                    likedProductIDs.remove(product.id)
-                }) {
-                    Image(systemName: "heart.slash")
-                        .foregroundStyle(.red)
+        NavigationStack {
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(stalls) { stall in
+                        NavigationLink(destination: DetailStall(stall: stall)) {
+                            StallCard(stall: stall)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
                 }
+                .padding()
             }
+            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("NgiritKuy")
         }
     }
 }
