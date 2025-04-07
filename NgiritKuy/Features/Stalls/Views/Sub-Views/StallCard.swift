@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct StallCard: View {
     let stall: Stall
     @Environment(\.modelContext) private var modelContext
+    @StateObject private var locationManager = LocationManager()
+    @State private var distance: String = "Calculating..."
 
     // Calculate the width of the image
     private let totalHorizontalPadding: CGFloat = 20 * 2
@@ -68,7 +71,7 @@ struct StallCard: View {
                         Image(systemName: "location.fill")
                             .font(.caption)
                             .foregroundStyle(.orange)
-                        Text("500 m away")
+                        Text(distance)
                             .font(.caption)
                             .foregroundStyle(.gray)
                     }
@@ -82,5 +85,54 @@ struct StallCard: View {
         .background(.background)
         .cornerRadius(12)
         .shadow(radius: 3)
+        .onAppear {
+            print("📌 Stall location: \(stall.area?.latitude ?? 0), \(stall.area?.longitude ?? 0)")
+            locationManager.startUpdatingLocation()
+            calculateDistance()
+        }
+        .onChange(of: locationManager.currentLocation) { _, newLocation in
+            if newLocation != nil {
+                calculateDistance()
+            }
+        }
+    }
+    
+    private func calculateDistance() {
+        guard let userLocation = locationManager.currentLocation else {
+            distance = "Waiting for location"
+            return
+        }
+        
+        guard let stallLocation = getStallLocation() else {
+            distance = "No stall location"
+            return
+        }
+        
+        let distanceInMeters = userLocation.distance(from: stallLocation)
+        
+        if distanceInMeters < 1000 {
+            distance = "\(Int(distanceInMeters))m away"
+        } else {
+            let distanceInKm = distanceInMeters / 1000
+            distance = String(format: "%.1f km away", distanceInKm)
+        }
+    }
+    
+    private func getStallLocation() -> CLLocation? {
+        guard let area = stall.area,
+              let latitude = area.latitude,
+              let longitude = area.longitude else {
+            print("⚠️ Missing location data for stall: \(stall.name)")
+            return nil
+        }
+        
+        // Ensure the coordinates are valid
+        guard CLLocationCoordinate2DIsValid(CLLocationCoordinate2D(latitude: latitude, longitude: longitude)) else {
+            print("⚠️ Invalid coordinates for stall: \(stall.name) - \(latitude), \(longitude)")
+            return nil
+        }
+        
+        print("📍 Stall location found: \(latitude), \(longitude)")
+        return CLLocation(latitude: latitude, longitude: longitude)
     }
 }
