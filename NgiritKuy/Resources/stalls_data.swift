@@ -1,5 +1,5 @@
 //
-//  GOPArea.swift
+//  GOPArea.t
 //  NgiritKuy
 //
 //  Created by Jerry Febriano on 07/04/25.
@@ -8,8 +8,8 @@
 import Foundation
 import SwiftData
 
-// Assuming GOPArea and MenuType enums are defined elsewhere
-// enum GOPArea { case gop1, gop2, gop3, gop4, gop5, gop6, gop7, gop9 }
+// Assuming GOPArea and MenuType enums are defined elsee
+// enum GOPArea { case gop1, gop2, gop3, gop4, gop5, gop6, gop7, g}
 // enum MenuType { case indonesian, western, chinese, japanese, korean, javanese, sundanese }
 
 // Structure: (Kiosk Name, Kiosk Description, Min Price, Max Price, Avg Price, GOP Area, Kiosk Name String, Menu Items)
@@ -33,6 +33,7 @@ let allFoodCourtStalls: [StallData] =
         dapurKepoMieJagoStallData,
         kantin28StallData,
         kedaiWakariStallData,
+        dapurKencanaStallData
     ] + greenEatery
 
 let smallFoodCourtStalls: [StallData] = [
@@ -48,7 +49,7 @@ let greenEatery: [StallData] = [
         5.0,
         18.0,
         7.4,
-        GOPArea.gop1,
+        GOPArea.gop9,
         "Kantin Wartas",
         [
             (
@@ -203,7 +204,7 @@ let greenEatery: [StallData] = [
         3.0,
         23.0,
         12.9,
-        GOPArea.gop1,
+        GOPArea.gop9,
         "Kedai Soto Pak Gembul",
         [
             (
@@ -255,7 +256,7 @@ let greenEatery: [StallData] = [
         3.0,
         25.0,
         13.7,
-        GOPArea.gop1,
+        GOPArea.gop9,
         "Bakso Bakwan Malang Josss",
         [
             (
@@ -365,7 +366,7 @@ let greenEatery: [StallData] = [
         0.001,
         14.0,
         5.3,
-        GOPArea.gop1,
+        GOPArea.gop9,
         "Kantin Kasturi",
         [
             ("Martabak Telur isi 2", 5.0, "", "non-vegan", "", .indonesian),
@@ -666,7 +667,7 @@ let greenEatery: [StallData] = [
         0.0,
         38.0,
         16.7,
-        GOPArea.gop1,
+        GOPArea.gop9,
         "Mie Ayam Kriuk",
         [
             ("Pangsit 8pcs", 15.0, "", "non-vegan", "", .indonesian),
@@ -723,7 +724,7 @@ let greenEatery: [StallData] = [
         2.0,
         30.0,
         15.4,
-        GOPArea.gop1,
+        GOPArea.gop9,
         "Mustafa Minang",
         [
             (
@@ -859,7 +860,7 @@ let greenEatery: [StallData] = [
         6.0,
         20.0,
         11.7,
-        GOPArea.gop1,
+        GOPArea.gop9,
         "Kedai Laris Manis",
         [
             (
@@ -930,7 +931,7 @@ let greenEatery: [StallData] = [
         2.0,
         15.0,
         7.5,
-        GOPArea.gop1,
+        GOPArea.gop9,
         "Ahza Snack and Beverage",
         [
             ("Es", 2.0, "Es", "non-vegan", "", .indonesian),
@@ -1114,7 +1115,7 @@ let greenEatery: [StallData] = [
         3.0,
         27.0,
         12.4,
-        GOPArea.gop1,
+        GOPArea.gop9,
         "La Ding",
         [
             (
@@ -1170,7 +1171,7 @@ let pondokBaksoPakJokoStallData: StallData = (
     3.0,  // Min Price: Kerupuk 3k
     25.0,  // Max Price: All Bakso variants 25k
     17.6,  // Average Price (calculated from listed items: (25*6 + 8 + 10 + 5 + 3) / 10)
-    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placeholder
+    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placehr
     "PONDOK BAKSO PAK JOKO",
     [
         (
@@ -1222,7 +1223,7 @@ let ayamRemekGoangStallData: StallData = (
     6.0,  // Min Price: Air Mineral 6k
     37.0,  // Max Price: Nasi Goang Ayam Remek Matah/Goang 37k
     19.62,  // Average Price (calculated from Paket, Ala Carte, Snack, Drink items)
-    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placeholder
+    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placehr
     "AYAM REMEK GOANG",
     [
         // Paket
@@ -1367,7 +1368,7 @@ let keKeiStallData: StallData = (
     5.0,  // Min Price: Air Mineral 5k
     88.0,  // Max Price: Iga Sapi BBQ 88k
     32.13,  // Average Price (calculated from all listed items across images)
-    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placeholder
+    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placehr
     "KE KEI",
     [
         // Fridge Menu / Left Vertical Menu (Consistent across images)
@@ -1719,7 +1720,7 @@ let warungKitaStallData: StallData = (
     8.0,  // Estimated Min Price: Es Teh Manis 8k
     50.0,  // Estimated Max Price: Sate Kambing 50k
     25.07,  // Estimated Average Price (calculated from estimated item prices)
-    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placeholder
+    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placehr
     "WARUNG KITA",
     [
         // Estimated Menu Items based on visuals
@@ -1794,7 +1795,7 @@ let sotoKudusStallData: StallData = (
     2.0,  // Min Price: K. Kaleng 2k
     25.0,  // Max Price: Soto Kudus Spesial / Campur Nasi 25k
     7.71,  // Average Price (calculated from listed items: 131 / 17)
-    GOPArea.gop2,  // Assuming GOPArea based on relative position, placeholder
+    GOPArea.foodcourt,  // Assuming GOPArea based on relative position, placehr
     "SOTO KUDUS STALL",  // Placeholder name string
     [
         (
@@ -1875,7 +1876,7 @@ let pecelMadiunBuLinStallData: StallData = (
     3.0,  // Min Price: Bakwan Jagung/Sayur, Tempe Mendoan, Tahu/Tempe Goreng @ 3k
     58.0,  // Max Price: Sop Buntut 58k
     24.03,  // Average Price (calculated from listed items, using lower price for ranges)
-    GOPArea.gop3,  // Assuming GOPArea based on relative position, placeholder
+    GOPArea.foodcourt,  // Assuming GOPArea based on relative position, placehr
     "PECEL MADIUN BU LIN NASI BERKAT",
     [
         // Nasi Pecel / Pecel Sayur
@@ -2224,7 +2225,7 @@ let uenaMieChiliOilStallData: StallData = (
     14.0,  // Min Price: Mie Chili Oil 14k
     19.0,  // Max Price: Mie Yamin Manis 19k
     16.67,  // Average Price: (14 + 17 + 19) / 3
-    GOPArea.gop3,  // Assuming GOPArea based on relative position, placeholder
+    GOPArea.foodcourt,  // Assuming GOPArea based on relative position, placehr
     "UENA MIE CHILI OIL",
     [
         (
@@ -2249,7 +2250,7 @@ let nyandoeKitchenStallData: StallData = (
     15.0,  // Estimated Min Price: Kentang Goreng 15k
     35.0,  // Estimated Max Price: Nasi Goreng Seafood / Ikan Fillet 35k
     27.6,  // Estimated Average Price
-    GOPArea.gop3,  // Assuming GOPArea based on relative position, placeholder
+    GOPArea.foodcourt,  // Assuming GOPArea based on relative position, placehr
     "NYANDOE KITCHEN",
     [
         // Prices are estimated
@@ -2305,7 +2306,7 @@ let mieKocokMarikaStallData: StallData = (
     3.0,  // Estimated Min Price: Kerupuk 3k
     45.0,  // Estimated Max Price: Mie Kocok Komplit 45k
     30.09,  // Estimated Average Price
-    GOPArea.gop3,  // Assuming GOPArea based on relative position, placeholder
+    GOPArea.foodcourt,  // Assuming GOPArea based on relative position, placehr
     "MIE KOCOK BANDUNG MARIKA",
     [
         // Prices are estimated
@@ -2367,7 +2368,7 @@ let dapurKepoMieJagoStallData: StallData = (
     1.0,  // Min Price: Air Mineral Gelas 1k
     40.0,  // Max Price: Paket Tongseng Iga Sapi 40k
     21.08,  // Average Price (calculated from listed items)
-    GOPArea.gop4,  // Assuming GOPArea based on relative position, placeholder
+    GOPArea.foodcourt,  // Assuming GOPArea based on relative position, placehr
     "DAPUR KEPO X MIE JAGO",
     [
         // Mie Aja
@@ -2493,7 +2494,7 @@ let kantin28StallData: StallData = (
     2.0,  // Min Price: Gorengan 2k
     40.0,  // Max Price: Paket Hemat A 40k
     16.06,  // Average Price (calculated from listed items)
-    GOPArea.gop4,  // Assuming GOPArea based on relative position, placeholder
+    GOPArea.foodcourt,  // Assuming GOPArea based on relative position, placehr
     "KANTIN 28",
     [
         // Paket 20k Choices (Base price 20k includes Nasi Putih)
@@ -2697,7 +2698,7 @@ let kedaiWakariStallData: StallData = (
     3.0,  // Min Price: Aneka gorengan 3k
     25.0,  // Max Price: Ketoprak, Gado-Gado, Nasi Soto Lamongan 25k
     14.82,  // Average Price (calculated from listed items)
-    GOPArea.gop5,  // Assuming GOPArea based on relative position, placeholder
+    GOPArea.foodcourt,  // Assuming GOPArea based on relative position, placehr
     "KEDAI WAKARI",
     [
         (
@@ -2755,3 +2756,91 @@ let kedaiWakariStallData: StallData = (
         ),  // Could be non-veg depending on type
     ]
 )
+
+let dapurKencanaStallData: StallData = (
+    "Dapur Kencana",
+    "Restaurant offering a wide variety of Indonesian dishes, including Prasmanan (buffet-style), snacks (Cemilan), main courses, soups, chicken specialties, and breakfast items.",
+    3.5, // Min Price: Aneka Gorengan 3.5k
+    44.0, // Max Price: Soto Daging Garang Asem Set 44k
+    18.96, // Average Price (calculated from all listed items, using lower price for ranges/ala carte)
+    GOPArea.gop1, // Assuming GOPArea based on relative position, placeholder
+    "DAPUR KENCANA",
+    [
+        // Prasmanan Menu
+        ("Nasi Putih (Prasmanan)", 6.0, "Plain white rice (buffet)", "vegetarian", "nasi_putih_dk.jpg", .indonesian),
+        ("Nasi Uduk (Prasmanan)", 8.0, "Coconut milk rice (buffet)", "vegetarian", "nasi_uduk_dk.jpg", .indonesian),
+        ("1 Aneka Olahan Telur", 8.5, "1 portion of egg dish (buffet)", "vegetarian", "olahan_telur_dk.jpg", .indonesian),
+        ("1 Aneka Olahan Sayur", 6.5, "1 portion of vegetable dish (buffet)", "vegetarian", "olahan_sayur_dk.jpg", .indonesian),
+        ("1 Aneka Olahan Ayam / Ikan", 13.5, "1 portion of chicken/fish dish (buffet)", "non-vegetarian", "olahan_ayam_ikan_dk.jpg", .indonesian),
+        ("1 Aneka Olahan Daging Sapi / Cumi / Udang", 18.5, "1 portion of beef/squid/shrimp dish (buffet)", "non-vegetarian", "olahan_daging_dk.jpg", .indonesian),
+        ("1 Aneka Gorengan", 3.5, "1 portion of fried snacks (buffet)", "vegetarian", "gorengan_dk.jpg", .indonesian), // Could be non-veg
+        ("1 Semur Kentang / Tahu", 5.0, "1 portion of potato/tofu stew (buffet)", "vegetarian", "semur_kentang_tahu_dk.jpg", .indonesian),
+
+        // Minuman (Prasmanan Menu)
+        ("Es Teh / Panas Tawar", 5.0, "Iced/Hot plain tea", "vegetarian", "teh_tawar_dk.jpg", .indonesian),
+        ("Es Teh / Panas Manis", 7.0, "Iced/Hot sweet tea", "vegetarian", "teh_manis_dk.jpg", .indonesian),
+        ("Es Ocha / Panas Ocha", 5.0, "Iced/Hot Ocha tea", "vegetarian", "ocha_dk.jpg", .japanese),
+        ("Air Mineral (Prasmanan)", 5.0, "Mineral water", "vegetarian", "air_mineral_dk.jpg", .indonesian),
+        ("Hot/Ice Coffee Tubruk", 8.0, "Hot/Iced coarse ground coffee", "vegetarian", "kopi_tubruk_dk.jpg", .indonesian),
+        ("Hot/Ice Coffee Drip", 15.0, "Hot/Iced drip coffee", "vegetarian", "kopi_drip_dk.jpg", .western),
+
+        // Cemilan Menu
+        ("Japchae", 15.0, "Korean glass noodle stir fry", "vegetarian", "japchae_dk.jpg", .korean), // Often contains meat, but can be veg
+        ("Martabak Goreng", 14.0, "Fried savory pancake", "non-vegetarian", "martabak_goreng_dk.jpg", .indonesian),
+        ("Chicken Ball", 15.0, "Chicken meatballs", "non-vegetarian", "chicken_ball_dk.jpg", .chinese),
+        ("Spring Roll", 9.0, "Fried spring rolls", "vegetarian", "spring_roll_dk.jpg", .chinese), // Filling might vary
+        ("French Fries", 19.0, "French fries", "vegetarian", "french_fries_dk.jpg", .western),
+        ("Corndog Sosis", 7.0, "Sausage corn dog (per piece)", "non-vegetarian", "corndog_sosis_dk.jpg", .western),
+        ("Tteokbokki", 14.0, "Korean spicy rice cakes", "vegetarian", "tteokbokki_dk.jpg", .korean),
+        ("Chicken Crispy Original", 17.0, "Original crispy chicken snack", "non-vegetarian", "chicken_crispy_original_dk.jpg", .western),
+        ("Chicken Crispy Orange / Gochujang", 20.0, "Crispy chicken snack with orange or gochujang sauce", "non-vegetarian", "chicken_crispy_sauce_dk.jpg", .western), // Gochujang is Korean
+        ("Apple Pie", 7.5, "Apple pie slice", "vegetarian", "apple_pie_dk.jpg", .western),
+        ("Siomai", 15.0, "Steamed fish/meat dumplings", "non-vegetarian", "siomai_dk.jpg", .chinese), // Often fish/shrimp
+
+        // Daftar Menu (Main Dishes)
+        ("Tongseng Daging Sapi Ala", 28.0, "Beef tongseng stew (a la carte)", "non-vegetarian", "tongseng_sapi_ala_dk.jpg", .javanese),
+        ("Tongseng Daging Sapi Set", 33.0, "Beef tongseng stew set (with rice)", "non-vegetarian", "tongseng_sapi_set_dk.jpg", .javanese),
+        ("Soto Ayam Bening Ala", 21.0, "Clear chicken soup (a la carte)", "non-vegetarian", "soto_ayam_bening_ala_dk.jpg", .indonesian),
+        ("Soto Ayam Bening Set", 26.0, "Clear chicken soup set (with rice)", "non-vegetarian", "soto_ayam_bening_set_dk.jpg", .indonesian),
+        ("Soto Daging Garang Asem Ala", 39.0, "Spicy & sour beef soup (a la carte)", "non-vegetarian", "soto_garang_asem_ala_dk.jpg", .javanese),
+        ("Soto Daging Garang Asem Set", 44.0, "Spicy & sour beef soup set (with rice)", "non-vegetarian", "soto_garang_asem_set_dk.jpg", .javanese),
+        ("Chicken Katsu Ala", 23.0, "Chicken cutlet (a la carte)", "non-vegetarian", "chicken_katsu_ala_dk.jpg", .japanese),
+        ("Chicken Katsu Set", 28.0, "Chicken cutlet set (with rice)", "non-vegetarian", "chicken_katsu_set_dk.jpg", .japanese),
+        ("Soto Betawi Ayam Ala", 22.0, "Betawi-style coconut milk chicken soup (a la carte)", "non-vegetarian", "soto_betawi_ayam_ala_dk.jpg", .indonesian),
+        ("Soto Betawi Ayam Set", 27.0, "Betawi-style coconut milk chicken soup set (with rice)", "non-vegetarian", "soto_betawi_ayam_set_dk.jpg", .indonesian),
+        ("Soto Betawi Daging Ala", 31.0, "Betawi-style coconut milk beef soup (a la carte)", "non-vegetarian", "soto_betawi_daging_ala_dk.jpg", .indonesian),
+        ("Soto Betawi Daging Set", 36.0, "Betawi-style coconut milk beef soup set (with rice)", "non-vegetarian", "soto_betawi_daging_set_dk.jpg", .indonesian),
+        ("Sop Daging Ala", 34.0, "Beef soup (a la carte)", "non-vegetarian", "sop_daging_ala_dk.jpg", .indonesian),
+        ("Sop Daging Set", 39.0, "Beef soup set (with rice)", "non-vegetarian", "sop_daging_set_dk.jpg", .indonesian),
+        ("Garang Asem Ayam Ala", 24.0, "Spicy & sour chicken dish (a la carte)", "non-vegetarian", "garang_asem_ayam_ala_dk.jpg", .javanese),
+        ("Garang Asem Ayam Set", 30.0, "Spicy & sour chicken dish set (with rice)", "non-vegetarian", "garang_asem_ayam_set_dk.jpg", .javanese),
+        ("Gulai Ayam Ala", 24.0, "Chicken curry (a la carte)", "non-vegetarian", "gulai_ayam_ala_dk.jpg", .indonesian),
+        ("Gulai Ayam Set", 30.0, "Chicken curry set (with rice)", "non-vegetarian", "gulai_ayam_set_dk.jpg", .indonesian),
+        ("Chicken / Dori Katsu Nabe Original Ala", 28.0, "Chicken/Dory cutlet hot pot (original, a la carte)", "non-vegetarian", "katsu_nabe_original_ala_dk.jpg", .japanese),
+        ("Chicken / Dori Katsu Nabe Original Set", 33.0, "Chicken/Dory cutlet hot pot (original, set)", "non-vegetarian", "katsu_nabe_original_set_dk.jpg", .japanese),
+        ("Chicken / Dori Katsu Nabe Sweet Chili Ala", 31.0, "Chicken/Dory cutlet hot pot (sweet chili, a la carte)", "non-vegetarian", "katsu_nabe_sweet_chili_ala_dk.jpg", .japanese),
+        ("Chicken / Dori Katsu Nabe Sweet Chili Set", 36.0, "Chicken/Dory cutlet hot pot (sweet chili, set)", "non-vegetarian", "katsu_nabe_sweet_chili_set_dk.jpg", .japanese),
+        ("Chicken / Dori Katsu Nabe Spicy Ala", 33.0, "Chicken/Dory cutlet hot pot (spicy, a la carte)", "non-vegetarian", "katsu_nabe_spicy_ala_dk.jpg", .japanese),
+        ("Chicken / Dori Katsu Nabe Spicy Set", 38.0, "Chicken/Dory cutlet hot pot (spicy, set)", "non-vegetarian", "katsu_nabe_spicy_set_dk.jpg", .japanese),
+        ("Ayam Serundeng Ala", 22.0, "Fried chicken with spiced coconut flakes (a la carte)", "non-vegetarian", "ayam_serundeng_ala_dk.jpg", .indonesian),
+        ("Ayam Serundeng Set", 35.0, "Fried chicken with spiced coconut flakes set (with rice)", "non-vegetarian", "ayam_serundeng_set_dk.jpg", .indonesian), // Price seems high for set, check image
+        ("Ayam Goreng Kremes Ala", 24.0, "Fried chicken with crispy bits (a la carte)", "non-vegetarian", "ayam_kremes_ala_dk.jpg", .indonesian),
+        ("Ayam Goreng Kremes Set", 38.0, "Fried chicken with crispy bits set (with rice)", "non-vegetarian", "ayam_kremes_set_dk.jpg", .indonesian), // Price seems high for set, check image
+        ("Gado-Gado", 23.0, "Vegetable salad with peanut sauce", "vegetarian", "gado_gado_dk.jpg", .indonesian),
+        ("Sate Ayam", 27.0, "Chicken satay", "non-vegetarian", "sate_ayam_dk.jpg", .indonesian),
+        ("Bakmie Goreng Spesial", 29.0, "Special fried noodles", "non-vegetarian", "bakmie_goreng_spesial_dk.jpg", .indonesian),
+        ("Bakso Sapi", 23.0, "Beef meatball soup", "non-vegetarian", "bakso_sapi_dk.jpg", .indonesian),
+        ("Nasi Goreng Spesial", 25.0, "Special fried rice", "non-vegetarian", "nasi_goreng_spesial_dk.jpg", .indonesian),
+
+        // Sarapan Pagi Menu
+        ("Beef Sandwich", 24.0, "Beef sandwich", "non-vegetarian", "beef_sandwich_dk.jpg", .western),
+        ("Bakmie Ayam Pangsit", 20.0, "Chicken noodles with wonton (breakfast)", "non-vegetarian", "bakmie_ayam_pangsit_dk.jpg", .indonesian),
+        ("Nasi Uduk Telur Balado", 20.0, "Coconut rice with egg in chili sauce", "vegetarian", "nasi_uduk_telur_balado_dk.jpg", .indonesian),
+        ("Bubur Jepang", 17.0, "Japanese rice porridge", "non-vegetarian", "bubur_jepang_dk.jpg", .japanese), // Usually contains chicken/dashi
+        ("American Breakfast", 29.0, "American breakfast set", "non-vegetarian", "american_breakfast_dk.jpg", .western),
+        ("Lontong Sayur", 18.0, "Rice cakes with vegetable curry", "vegetarian", "lontong_sayur_dk.jpg", .indonesian), // Can be non-veg if broth used
+        ("Sandwich Ragout", 19.0, "Sandwich with ragout filling", "non-vegetarian", "sandwich_ragout_dk.jpg", .western) // Ragout usually meat-based
+    ]
+)
+
+// Note: Descriptions, dietary tags, image names, GOP Area, and menu types are inferred or placeholders. Prices for Ayam Serundeng Set and Ayam Goreng Kremes Set seem high compared to ala carte; used listed price but might be typo on menu. Dietary tags assume common preparations (e.g., Japchae often has meat, Lontong Sayur broth might not be veg). Buffet item prices are per portion.
