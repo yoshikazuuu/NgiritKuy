@@ -32,7 +32,7 @@ struct StallCard: View {
                 } else {
                     Rectangle()
                         .fill(Color.gray.opacity(0.3))
-                        .frame(width: .infinity, height: imageHeight)
+                        .frame(height: imageHeight)
                         .clipShape(
                             RoundedRectangle(
                                 cornerRadius: 12, style: .continuous)
@@ -79,7 +79,7 @@ struct StallCard: View {
             }
             .padding(10)
         }
-        .background(Color.white)
+        .background(.background)
         .cornerRadius(12)
         .shadow(radius: 3)
     }
