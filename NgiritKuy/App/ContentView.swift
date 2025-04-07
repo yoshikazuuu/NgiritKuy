@@ -1,0 +1,33 @@
+//
+//  ContentView.swift
+//  NgiritKuy
+//
+//  Created by Jerry Febriano on 07/04/25.
+//
+
+import SwiftData
+import SwiftUI
+
+struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+
+    var body: some View {
+        TabView {
+            StallsTabView()
+                .tabItem {
+                    Label("Stalls", systemImage: "fork.knife")
+                }
+            
+            FavoriteTabView()
+                .tabItem {
+                    Label("Favorites", systemImage: "heart.fill")
+                }
+            
+        }
+
+    }
+}
+
+#Preview {
+    ContentView()
+}
