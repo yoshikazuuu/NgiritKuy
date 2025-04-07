@@ -7,11 +7,16 @@
 
 import SwiftData
 import SwiftUI
+// Assuming GameCenterManager and GameCenterAchievementsView are defined elsewhere
+// import GameKit
 
 struct StallView: View {
     @Environment(\.modelContext) private var modelContext
+    @StateObject private var gameCenter = GameCenterManager.shared
     @Query private var stalls: [Stall]
-    @Query private var areas: [GOPArea]
+    @Query private var areas: [GOPArea] // Assuming GOPArea is used elsewhere
+
+    @State private var isShowingAchievement = false
 
     let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -23,10 +28,7 @@ struct StallView: View {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(stalls) { stall in
-                        NavigationLink(
-                            destination:
-                                DetailStall(stall: stall)
-                        ) {
+                        NavigationLink(destination: DetailStall(stall: stall)) {
                             StallCard(stall: stall)
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -36,6 +38,40 @@ struct StallView: View {
             }
             .navigationBarTitleDisplayMode(.large)
             .navigationTitle("NgiritKuy")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        if gameCenter.isAuthenticated {
+                            isShowingAchievement = true
+                        } else {
+                            // Attempt authentication if not already authenticated
+                            Task {
+                                gameCenter.authenticatePlayer()
+                                // Optionally check result and show sheet immediately
+                                // if await gameCenter.authenticatePlayer() {
+                                //     isShowingAchievement = true
+                                // }
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "star.fill")
+                    }
+                    // Optional: Disable button based on Game Center status
+                    // .disabled(!gameCenter.isGameCenterEnabled)
+                }
+            }
+            .sheet(isPresented: $isShowingAchievement) {
+                GameCenterAchievementsView(isPresented: $isShowingAchievement)
+                    .environmentObject(gameCenter) // Pass manager to the sheet
+            }
         }
+        // Optional: Attempt authentication when the view appears
+        // .onAppear {
+        //     if !gameCenter.isAuthenticated {
+        //         Task {
+        //             await gameCenter.authenticatePlayer()
+        //         }
+        //     }
+        // }
     }
 }

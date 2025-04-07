@@ -35,6 +35,11 @@ let allFoodCourtStalls: [StallData] =
         kedaiWakariStallData,
     ] + greenEatery
 
+let smallFoodCourtStalls: [StallData] = [
+    keKeiStallData,
+    pondokBaksoPakJokoStallData
+]
+
 let greenEatery: [StallData] = [
 
     (

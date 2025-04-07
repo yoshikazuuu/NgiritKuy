@@ -5,9 +5,8 @@
 //  Created by Jerry Febriano on 07/04/25.
 //
 
-
-import SwiftData
 import CoreLocation
+import SwiftData
 
 @Model
 final class Stall {
@@ -18,7 +17,8 @@ final class Stall {
     var maximumPrice: Double
     var averagePrice: Double
     @Relationship var area: GOPArea?
-    @Relationship(deleteRule: .cascade) var menu: [FoodMenu] = []
+    @Relationship(deleteRule: .cascade, inverse: \FoodMenu.stall) var menu:
+        [FoodMenu] = []
     var isFavorite: Bool = false
     var image: Data?
 
@@ -52,7 +52,7 @@ extension Stall {
         get { area?.latitude }
         set { area?.latitude = newValue ?? 0 }
     }
-    
+
     var longitude: Double? {
         get { area?.longitude }
         set { area?.longitude = newValue ?? 0 }

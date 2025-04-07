@@ -19,8 +19,7 @@ final class FoodMenu {
     var type: [String]
     var dietType: String
     var menuType: MenuType
-    
-    @Relationship var stall: Stall?
+    var stall: Stall?
     
     init(
         id: UUID = UUID(),

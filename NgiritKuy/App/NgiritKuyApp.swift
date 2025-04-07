@@ -1,37 +1,49 @@
-//
-//  NgiritKuyApp.swift
-//  NgiritKuy
-//
-//  Created by Jerry Febriano on 07/04/25.
-//
-
 import SwiftData
 import SwiftUI
 
 @main
 struct NgiritKuyApp: App {
-    var sharedModelContainer: ModelContainer = {
+
+    let sharedModelContainer: ModelContainer
+
+    init() {
+        // Define the schema (ensure GOPArea is removed if it's an Enum)
         let schema = Schema([
             Stall.self,
             FoodMenu.self,
-            GOPArea.self
+                // GOPArea.self, // REMOVE THIS if GOPArea is an Enum
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        
-        let container: ModelContainer
+        let modelConfiguration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false
+        )
+
         do {
-            container = try ModelContainer(for: schema, configurations: [modelConfiguration])
-            
-            // Seed data if needed
-            Task {
-                await seedData(ModelContext(container))
+            // 1. Create the container (assign to a local constant first)
+            let container = try ModelContainer(
+                for: schema,
+                configurations: [modelConfiguration]
+            )
+            // 2. Assign the created container to the instance property 'self'
+            self.sharedModelContainer = container
+
+            // 3. Check and Seed Data AFTER container creation
+            // Explicitly capture the 'container' constant in the Task's capture list
+            // This avoids capturing 'self'
+            Task { [container] in  // <-- FIX: Explicit capture list
+                // Explicitly run on MainActor for safety with ModelContext
+                await MainActor.run {
+                    Self.seedInitialDataIfNeeded(
+                        // Use the captured container constant
+                        context: ModelContext(container)
+                    )
+                }
             }
-            
-            return container
+
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
-    }()
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -39,37 +51,66 @@ struct NgiritKuyApp: App {
         }
         .modelContainer(sharedModelContainer)
     }
+
+    // Helper function to check if seeding is needed
+    @MainActor
+    static func seedInitialDataIfNeeded(context: ModelContext) {
+        // Check if data already exists (e.g., by fetching one Stall)
+        let descriptor = FetchDescriptor<Stall>()
+        do {
+            let count = try context.fetchCount(descriptor)
+            if count == 0 {
+                // No data found, proceed with seeding
+                print("Persistent store is empty. Seeding initial data...")
+                // Call the actual seeding function (defined in Utils.swift)
+                seedData(context, allFoodCourtStalls)
+                print("Finished seeding persistent store.")
+            } else {
+                // Data already exists
+                print("Persistent store already contains data. Skipping seed.")
+            }
+        } catch {
+            print("Failed to fetch data to check for seeding: \(error)")
+            // Handle the error appropriately
+        }
+    }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previewContainer: ModelContainer = {
-        // Create an in-memory model container for seeding previews
-        let schema = Schema([
-            Stall.self,
-            FoodMenu.self,
-            GOPArea.self,
-        ])
-        let modelConfiguration =
-        ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-        let container: ModelContainer
-        
-        do {
-            container = try ModelContainer(
-                for: schema,
-                configurations: [modelConfiguration]
-            )
-        } catch {
-            fatalError("Could not create in-memory ModelContainer: \(error)")
+// --- Previews Setup (remains the same as the previous corrected version) ---
+
+@MainActor
+let previewContainer: ModelContainer = {
+    let schema = Schema([
+        Stall.self,
+        FoodMenu.self,
+            // GOPArea.self, // REMOVE THIS if GOPArea is an Enum
+    ])
+    let modelConfiguration = ModelConfiguration(
+        schema: schema,
+        isStoredInMemoryOnly: true
+    )
+
+    do {
+        let container = try ModelContainer(
+            for: schema,
+            configurations: [modelConfiguration]
+        )
+        print("Seeding preview (in-memory) container...")
+        // Use the same seedData function, but with the preview context
+        Task { [container] in  // Capture container here too for consistency
+            await MainActor.run {  // Explicitly run on MainActor
+                seedData(ModelContext(container), [uenaMieChiliOilStallData])
+                print("Finished seeding preview container.")
+            }
         }
-        
-        // Seed the container asynchronously.
-        Task {
-            await seedData(ModelContext(container))
-        }
-        
         return container
-    }()
-    
+    } catch {
+        fatalError(
+            "Could not create in-memory preview ModelContainer: \(error)")
+    }
+}()
+
+struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
             .modelContainer(previewContainer)
