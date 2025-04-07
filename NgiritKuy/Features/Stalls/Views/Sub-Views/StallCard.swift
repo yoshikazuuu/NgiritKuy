@@ -76,7 +76,7 @@ struct StallCard: View {
                             .foregroundStyle(.gray)
                     }
                 }
-                Text("Harga mulai Rp\(stall.averagePrice)")
+                Text("Harga mulai Rp\(Int(stall.averagePrice)).000")
                     .font(.caption)
                     .foregroundColor(.gray)
             }
