@@ -20,6 +20,7 @@ final class Stall {
     @Relationship(deleteRule: .cascade, inverse: \FoodMenu.stall) var menu:
         [FoodMenu] = []
     var isFavorite: Bool = false
+    var isVisited: Bool = false
     var image: Data?
 
     init(
@@ -31,6 +32,7 @@ final class Stall {
         area: GOPArea? = nil,
         menu: [FoodMenu] = [],
         isFavorite: Bool = false,
+        isVisited: Bool = false,
         image: Data? = nil,
         id: UUID = UUID()
     ) {
@@ -43,6 +45,7 @@ final class Stall {
         self.area = area
         self.menu = menu
         self.isFavorite = isFavorite
+        self.isVisited = isVisited
         self.image = image
     }
 }

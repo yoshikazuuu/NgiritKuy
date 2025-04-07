@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DetailStall: View {
     let stall: Stall
-    @State private var isMarked = false
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         ScrollView {
@@ -81,27 +81,34 @@ struct DetailStall: View {
 
                 VStack(spacing: 8) {
                     Button(action: {
-                        isMarked.toggle()
+                        stall.isVisited.toggle()
+                        AchievementTracker.shared.updateAchievements(
+                            context: modelContext)
                     }) {
                         HStack {
                             Image(
-                                systemName: isMarked
+                                systemName: stall.isVisited
                                     ? "checkmark.circle.fill"
                                     : "checkmark.circle"
                             )
-                            Text(isMarked ? "Visited" : "Mark as Visited")
-                                .fontWeight(.medium)
+                            Text(
+                                stall.isVisited ? "Visited" : "Mark as Visited"
+                            )
+                            .fontWeight(.medium)
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(isMarked ? Color.green : Color.blue)
+                        .background(stall.isVisited ? Color.green : Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                     }
                     .padding(.horizontal)
 
-                    Button {
-                    } label: {
+                    Button(action: {
+                        AchievementTracker.shared.didUseLocate()
+                        AchievementTracker.shared.updateAchievements(
+                            context: modelContext)
+                    }) {
                         HStack {
                             Image(systemName: "location.fill")
                             Text("Locate Me")
@@ -164,6 +171,7 @@ struct DetailStall: View {
                 // The .animation modifier on ForEach observes the change in `sortedMenu`
                 // caused by this state update and animates the transition.
             }
+            AchievementTracker.shared.updateAchievements(context: modelContext)
         }
     }
 }

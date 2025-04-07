@@ -58,6 +58,7 @@ struct StallCard: View {
                     Spacer()
                     Button(action: {
                         stall.isFavorite.toggle()
+                        AchievementTracker.shared.updateAchievements(context: modelContext)
                     }) {
                         Image(
                             systemName: stall.isFavorite
