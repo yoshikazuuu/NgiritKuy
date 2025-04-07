@@ -16,7 +16,7 @@ struct PriceTag: View {
         VStack(spacing: 4) {
             Text(label)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+//                .foregroundStyle(.secondary)
             
             
             HStack {
@@ -24,12 +24,12 @@ struct PriceTag: View {
                 Text("Rp\(price, specifier: "%.0f").000")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(color)
+//                    .foregroundStyle(color)
                 Spacer()
             }
         }
         .padding(8)
-        .background(color.opacity(0.1))
+//        .background(color.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
