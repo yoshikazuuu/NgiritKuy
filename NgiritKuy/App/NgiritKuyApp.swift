@@ -30,3 +30,5 @@ struct NgiritKuyApp: App {
         .modelContainer(sharedModelContainer)
     }
 }
+
+
