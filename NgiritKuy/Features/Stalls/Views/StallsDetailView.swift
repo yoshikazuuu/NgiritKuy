@@ -20,22 +20,21 @@ struct DetailStall: View {
                 {
                     Image(uiImage: uiImage)
                         .resizable()
-                        .aspectRatio(4 / 3, contentMode: .fill)
+                        .aspectRatio(5 / 4, contentMode: .fill)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 250)
                         .clipped()
                 } else {
                     Rectangle()
                         .fill(Color.gray.opacity(0.3))
-                        .aspectRatio(4 / 3, contentMode: .fill)
+                        .aspectRatio(5 / 4, contentMode: .fill)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 250)
                         .overlay {
                             Image(systemName: "photo")
                                 .font(.system(size: 50))
                                 .foregroundStyle(.gray)
                         }
                 }
+
                 // Stall Info
                 VStack(alignment: .leading, spacing: 5) {
                     Text(stall.name)
@@ -148,22 +147,21 @@ struct MenuItemRow: View {
 
     var body: some View {
         HStack {
-            if let imageData = menu.image, let uiImage = UIImage(data: imageData) {
+            if let imageData = menu.image,
+                let uiImage = UIImage(data: imageData)
+            {
                 Image(uiImage: uiImage)
                     .resizable()
-                    .aspectRatio(4/3, contentMode: .fill)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 250)
-                    .clipped()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 70, height: 70)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
                 Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .aspectRatio(4/3, contentMode: .fill)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 250)
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 70, height: 70)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay {
-                        Image(systemName: "photo")
-                            .font(.system(size: 50))
+                        Image(systemName: "fork.knife")
                             .foregroundStyle(.gray)
                     }
             }
@@ -186,4 +184,3 @@ struct MenuItemRow: View {
         .padding(.vertical, 5)
     }
 }
-
