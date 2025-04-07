@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct DetailStall: View {
     let stall: Stall
@@ -108,6 +109,36 @@ struct DetailStall: View {
                         AchievementTracker.shared.didUseLocate()
                         AchievementTracker.shared.updateAchievements(
                             context: modelContext)
+
+                        // Open Apple Maps with walking directions from your current location
+                        guard let area = stall.area,
+                            let latitude = area.latitude,
+                            let longitude = area.longitude
+                        else {
+                            print("Stall has no location data.")
+                            return
+                        }
+
+                        let destinationCoordinate = CLLocationCoordinate2D(
+                            latitude: latitude,
+                            longitude: longitude)
+                        let destinationPlacemark = MKPlacemark(
+                            coordinate: destinationCoordinate)
+                        let destinationMapItem = MKMapItem(
+                            placemark: destinationPlacemark)
+                        destinationMapItem.name = stall.name
+
+                        // Use MKMapItem.forCurrentLocation() to let Maps use your current location.
+                        let sourceMapItem = MKMapItem.forCurrentLocation()
+                        let launchOptions = [
+                            MKLaunchOptionsDirectionsModeKey:
+                                MKLaunchOptionsDirectionsModeWalking
+                        ]
+
+                        MKMapItem.openMaps(
+                            with: [sourceMapItem, destinationMapItem],
+                            launchOptions: launchOptions)
+
                     }) {
                         HStack {
                             Image(systemName: "location.fill")
