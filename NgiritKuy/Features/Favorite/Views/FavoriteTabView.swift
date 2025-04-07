@@ -1,18 +1,33 @@
 //
-//  FavoriteTabView.swift
+//  FavoritesView.swift
 //  NgiritKuy
 //
-//  Created by Jerry Febriano on 07/04/25.
+//  Created by Miftah Fauzy on 05/04/25.
 //
 
+import Foundation
 import SwiftUI
 
-struct FavoriteTabView: View {
-    var body: some View {
-        Text("Stalls View")
-    }
-}
+struct FavoritesView: View {
+    let products: [Product]
+    @Binding var likedProductIDs: Set<UUID>
 
-#Preview {
-    FavoriteTabView()
+    var likedProducts: [Product] {
+        products.filter { likedProductIDs.contains($0.id) }
+    }
+
+    var body: some View {
+        List(likedProducts) { product in
+            HStack {
+                Text(product.title)
+                Spacer()
+                Button(action: {
+                    likedProductIDs.remove(product.id)
+                }) {
+                    Image(systemName: "heart.slash")
+                        .foregroundStyle(.red)
+                }
+            }
+        }
+    }
 }
