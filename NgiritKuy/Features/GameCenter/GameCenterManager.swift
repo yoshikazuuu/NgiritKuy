@@ -65,4 +65,16 @@ class GameCenterManager: ObservableObject {
             }
         }
     }
+    
+    // reset achievements for testing
+    func resetAchievements() {
+        GKAchievement.resetAchievements { error in
+            if let error = error {
+                print("Error resetting achievements: \(error.localizedDescription)")
+            } else {
+                print("Achievements reset successfully!")
+                self.loadAchievements() // Refresh achievements list after reset
+            }
+        }
+    }
 }

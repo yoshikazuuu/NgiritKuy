@@ -9,138 +9,218 @@ import Foundation
 import GameKit
 import SwiftData
 
-/// This class queries the persisted data (using ModelContext),
-/// evaluates various achievement criteria, and then reports
-/// progress (or completion) to Game Center.
-final class AchievementTracker: ObservableObject {
+class AchievementTracker: ObservableObject {
     static let shared = AchievementTracker()
-
-    /// Example: Count how many times the user has used the Locate Me feature.
-    @Published var locateCount: Int = 0
-
-    private init() {}
-
-    /// Call this method after any user action that might affect achievements.
-    /// It queries the current data and reports achievement progress.
-    func updateAchievements(context: ModelContext) {
-        // --- Evaluate Stall-Based Achievements ---
+    
+    @Published var userProgress: UserProgress?
+    @Published var isUpdating: Bool = false
+    
+    private var context: ModelContext?
+    private let updateQueue = DispatchQueue(label: "com.ngiritKuy.achievements", qos: .background)
+    
+    // Initialize with context
+    func initialize(context: ModelContext) {
+        self.context = context
+        loadOrCreateUserProgress()
+    }
+    
+    private func loadOrCreateUserProgress() {
+        guard let context = context else { return }
+        
+        Task { @MainActor in
+            let descriptor = FetchDescriptor<UserProgress>()
+            do {
+                let existingProgress = try context.fetch(descriptor)
+                if let progress = existingProgress.first {
+                    self.userProgress = progress
+                } else {
+                    let newProgress = UserProgress()
+                    context.insert(newProgress)
+                    try context.save()
+                    self.userProgress = newProgress
+                }
+            } catch {
+                print("Error loading user progress: \(error)")
+            }
+        }
+    }
+    
+    // Public method for refreshing all metrics asynchronously
+    func refreshMetrics() {
+        guard !isUpdating, let context = context else { return }
+        
+        isUpdating = true
+        
+        updateQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Perform data queries on background thread
+            let metrics = self.calculateMetrics(context: context)
+            
+            // Update on main thread
+            DispatchQueue.main.async {
+                self.updateProgressWithMetrics(metrics)
+                self.checkAndReportAchievements()
+                self.isUpdating = false
+            }
+        }
+    }
+    
+    // Calculate all metrics on background thread
+    private func calculateMetrics(context: ModelContext) -> [String: Any] {
+        var metrics: [String: Any] = [:]
+        
         do {
+            // --- Stall Metrics ---
             let stallDescriptor = FetchDescriptor<Stall>()
             let stalls = try context.fetch(stallDescriptor)
-
+            
             let favoriteStalls = stalls.filter { $0.isFavorite }
             let visitedStalls = stalls.filter { $0.isVisited }
-
-            // Achievement: lowFav – Favorite at least 1 stall.
-            reportAchievement(
-                identifier: "lowFav",
-                current: Double(favoriteStalls.count),
-                required: 1)
-            // Achievement: medFav – Favorite at least 3 stalls.
-            reportAchievement(
-                identifier: "medFav",
-                current: Double(favoriteStalls.count),
-                required: 3)
-            // Achievement: highFav – Favorite at least 7 stalls.
-            reportAchievement(
-                identifier: "highFav",
-                current: Double(favoriteStalls.count),
-                required: 7)
-
-            // Achievements: Explore distinct areas.
+            
+            metrics["favoriteStallCount"] = favoriteStalls.count
+            metrics["visitedStallCount"] = visitedStalls.count
+            
+            // Areas visited
             let visitedAreaIDs = Set(visitedStalls.compactMap { $0.area?.id })
-            // lowExploreDistinct – Visited at least 2 different areas.
-            reportAchievement(
-                identifier: "lowExploreDistinct",
-                current: Double(visitedAreaIDs.count),
-                required: 2)
-            // allExploreDistinct – Visited all areas (using total count from GOPArea.all).
-            let totalAreas = Double(GOPArea.all.count)
-            reportAchievement(
-                identifier: "allExploreDistinct",
-                current: Double(visitedAreaIDs.count),
-                required: totalAreas)
-
-            // Achievements: Favorite stalls in a single area.
-            let favoriteStallsWithArea = favoriteStalls.filter {
-                $0.area != nil
-            }
-            let areaDict = Dictionary(
-                grouping: favoriteStallsWithArea, by: { $0.area!.id })
-            let maxFavInArea = areaDict.values.map { $0.count }.max() ?? 0
-
-            // lowFavInArea – At least 3 favorite stalls in an area.
-            reportAchievement(
-                identifier: "lowFavInArea",
-                current: Double(maxFavInArea),
-                required: 3)
-            // medFavInArea – At least 5 favorite stalls in an area.
-            reportAchievement(
-                identifier: "medFavInArea",
-                current: Double(maxFavInArea),
-                required: 5)
-
-            // visitedFiveStalls – Visit (mark as visited) at least 5 stalls.
-            reportAchievement(
-                identifier: "visitedFiveStalls",
-                current: Double(visitedStalls.count),
-                required: 5)
-
-        } catch {
-            print("Error fetching stalls for achievements: \(error)")
-        }
-
-        // --- Evaluate Food/ Menu-Based Achievements ---
-        do {
+            metrics["distinctAreasVisited"] = visitedAreaIDs
+            
+            // Max favorites in a single area
+            let areaDict = Dictionary(grouping: favoriteStalls.filter { $0.area != nil }, by: { $0.area!.id })
+            metrics["maxFavoritesInSingleArea"] = areaDict.values.map { $0.count }.max() ?? 0
+            
+            // --- Menu Metrics ---
             let menuDescriptor = FetchDescriptor<FoodMenu>()
             let menus = try context.fetch(menuDescriptor)
-
-            // Achievement: favFoodUnder10k – Favorite at least 4 menu items priced lower than 10k.
-            let favFoodsUnder10k = menus.filter {
-                $0.isFavorite && $0.price < 10
-            }
-            reportAchievement(
-                identifier: "favFoodUnder10k",
-                current: Double(favFoodsUnder10k.count),
-                required: 4)
-
-            // Achievement: favThreeFoodInStall – In at least one stall, favorite 3 foods/drinks.
+            
             let favoriteMenus = menus.filter { $0.isFavorite }
-            let menusGroupedByStall = Dictionary(
-                grouping: favoriteMenus, by: { $0.stall?.id })
-            let maxFavMenusInStall =
-                menusGroupedByStall.values.map { $0.count }.max() ?? 0
-            reportAchievement(
-                identifier: "favThreeFoodInStall",
-                current: Double(maxFavMenusInStall),
-                required: 3)
+            metrics["favoriteMenuCount"] = favoriteMenus.count
+            
+            // Favorites under 10k
+            let favFoodsUnder10k = favoriteMenus.filter { $0.price < 10 }
+            metrics["favoriteFoodsUnder10k"] = favFoodsUnder10k.count
+            
+            // Max favorites in a single stall
+            let stallMenuDict = Dictionary(grouping: favoriteMenus.filter { $0.stall != nil }, by: { $0.stall!.id })
+            metrics["maxFavoriteMenusInStall"] = stallMenuDict.values.map { $0.count }.max() ?? 0
+            
         } catch {
-            print("Error fetching menus for achievements: \(error)")
+            print("Error calculating metrics: \(error)")
         }
-
-        // --- Evaluate Locate-Based Achievement ---
-        // For example, "firstLocate" is achieved when the user tapped the locate button at least once.
-        reportAchievement(
-            identifier: "firstLocate",
-            current: Double(locateCount),
-            required: 1)
+        
+        return metrics
     }
-
-    /// Call this function when the user taps the “Locate Me” button.
-    func didUseLocate() {
-        locateCount += 1
+    
+    // Update the progress model with new metrics
+    private func updateProgressWithMetrics(_ metrics: [String: Any]) {
+        guard let userProgress = userProgress else { return }
+        
+        if let count = metrics["favoriteStallCount"] as? Int {
+            userProgress.favoriteStallCount = count
+        }
+        
+        if let count = metrics["visitedStallCount"] as? Int {
+            userProgress.visitedStallCount = count
+        }
+        
+        if let areaIDs = metrics["distinctAreasVisited"] as? Set<UUID> {
+            userProgress.distinctAreasVisited = areaIDs
+        }
+        
+        if let count = metrics["favoriteMenuCount"] as? Int {
+            userProgress.favoriteMenuCount = count
+        }
+        
+        if let count = metrics["favoriteFoodsUnder10k"] as? Int {
+            userProgress.favoriteFoodsUnder10k = count
+        }
+        
+        if let count = metrics["maxFavoritesInSingleArea"] as? Int {
+            userProgress.maxFavoritesInSingleArea = count
+        }
+        
+        if let count = metrics["maxFavoriteMenusInStall"] as? Int {
+            userProgress.maxFavoriteMenusInStall = count
+        }
+        
+        userProgress.lastUpdated = Date()
+        saveProgress()
     }
-
-    /// Helper that calculates the percentage (capped at 100) and reports to Game Center.
-    private func reportAchievement(
-        identifier: String,
-        current: Double,
-        required: Double
-    ) {
-        let progress = min(100, (current / required) * 100)
+    
+    // Check and report achievements based on current progress
+    private func checkAndReportAchievements() {
+        guard let progress = userProgress else { return }
+        
+        // Favorite stall achievements
+        reportAchievement(identifier: "lowFav", current: Double(progress.favoriteStallCount), required: 1)
+        reportAchievement(identifier: "medFav", current: Double(progress.favoriteStallCount), required: 3)
+        reportAchievement(identifier: "highFav", current: Double(progress.favoriteStallCount), required: 7)
+        
+        // Visit achievements
+        reportAchievement(identifier: "visitedFiveStalls", current: Double(progress.visitedStallCount), required: 5)
+        
+        // Area exploration
+        reportAchievement(identifier: "lowExploreDistinct", current: Double(progress.distinctAreasVisited.count), required: 2)
+        reportAchievement(identifier: "allExploreDistinct", current: Double(progress.distinctAreasVisited.count), required: Double(GOPArea.all.count))
+        
+        // Favorites in area
+        reportAchievement(identifier: "lowFavInArea", current: Double(progress.maxFavoritesInSingleArea), required: 3)
+        reportAchievement(identifier: "medFavInArea", current: Double(progress.maxFavoritesInSingleArea), required: 5)
+        
+        // Food under 10k
+        reportAchievement(identifier: "favFoodUnder10k", current: Double(progress.favoriteFoodsUnder10k), required: 4)
+        
+        // Favorites in stall
+        reportAchievement(identifier: "favThreeFoodInStall", current: Double(progress.maxFavoriteMenusInStall), required: 3)
+        
+        // Locate achievement
+        reportAchievement(identifier: "firstLocate", current: Double(progress.locateCount), required: 1)
+    }
+    
+    // Report achievement progress to Game Center
+    private func reportAchievement(identifier: String, current: Double, required: Double) {
+        guard let progress = userProgress else { return }
+        
+        // Skip if already marked as completed
+        if progress.completedAchievements.contains(identifier) {
+            return
+        }
+        
+        let percentage = min(100, (current / required) * 100)
         
         GameCenterManager.shared.reportAchievement(
             identifier: identifier,
-            percentComplete: progress)
+            percentComplete: percentage
+        )
+        
+        // Mark as completed if 100%
+        if percentage >= 100 && !progress.completedAchievements.contains(identifier) {
+            progress.completedAchievements.append(identifier)
+            saveProgress()
+        }
+    }
+    
+    // Increment locate count
+    func didUseLocate() {
+        guard let userProgress = userProgress else { return }
+        
+        updateQueue.async { [weak self] in
+            DispatchQueue.main.async {
+                userProgress.locateCount += 1
+                self?.saveProgress()
+                self?.reportAchievement(identifier: "firstLocate", current: Double(userProgress.locateCount), required: 1)
+            }
+        }
+    }
+    
+    // Save progress
+    private func saveProgress() {
+        guard let context = context else { return }
+        
+        do {
+            try context.save()
+        } catch {
+            print("Error saving user progress: \(error)")
+        }
     }
 }

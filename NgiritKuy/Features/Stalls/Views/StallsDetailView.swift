@@ -82,9 +82,7 @@ struct DetailStall: View {
 
                 VStack(spacing: 8) {
                     Button(action: {
-                        stall.isVisited.toggle()
-                        AchievementTracker.shared.updateAchievements(
-                            context: modelContext)
+                        stall.toggleVisited()
                     }) {
                         HStack {
                             Image(
@@ -107,10 +105,9 @@ struct DetailStall: View {
                     .sensoryFeedback(.success, trigger: stall.isVisited)
 
                     Button(action: {
+                        // Track the achievement of using the locate feature
                         AchievementTracker.shared.didUseLocate()
-                        AchievementTracker.shared.updateAchievements(
-                            context: modelContext)
-
+                        
                         // Open Apple Maps with walking directions from your current location
                         guard let area = stall.area,
                             let latitude = area.latitude,
@@ -198,12 +195,12 @@ struct DetailStall: View {
             // Perform the state change that triggers the UI update
             // Wrap the state change in withAnimation
             withAnimation(.spring()) {  // Use .default or customize (e.g., .spring())
-                stall.menu[index].isFavorite.toggle()
-                // The @Binding automatically propagates this change back to the parent's state
+                stall
+                    .menu[index]
+                    .toggleFavorite()                // The @Binding automatically propagates this change back to the parent's state
                 // The .animation modifier on ForEach observes the change in `sortedMenu`
                 // caused by this state update and animates the transition.
             }
-            AchievementTracker.shared.updateAchievements(context: modelContext)
         }
     }
 }
