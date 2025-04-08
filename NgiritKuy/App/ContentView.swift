@@ -41,6 +41,7 @@ struct ContentView: View {
                 }
         }
         .onAppear {
+            // reset achievements from start to debug (delete this when release)
             gameCenter.resetAchievements()
             if !gameCenter.isAuthenticated {
                 Task {

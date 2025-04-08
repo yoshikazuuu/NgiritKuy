@@ -102,6 +102,7 @@ struct DetailStall: View {
                         .cornerRadius(10)
                     }
                     .padding(.horizontal)
+                    .sensoryFeedback(.success, trigger: stall.isVisited)
 
                     Button(action: {
                         // Track the achievement of using the locate feature

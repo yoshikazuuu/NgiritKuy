@@ -30,7 +30,6 @@ class GameCenterManager: ObservableObject {
             } else if localPlayer.isAuthenticated {
                 self.isAuthenticated = true
                 print("Player authenticated")
-                self.loadAchievements()  // Optionally load achievements on auth
             } else {
                 self.isAuthenticated = false
                 if let error = error {
@@ -51,21 +50,18 @@ class GameCenterManager: ObservableObject {
                 print("Error reporting achievement: \(error.localizedDescription)")
             } else {
                 print("Achievement \(identifier) reported successfully!")
-                self.loadAchievements() // Refresh achievements list if needed
             }
         }
     }
     
-    /// Load all achievements for the local player.
-    func loadAchievements() {
-        GKAchievement.loadAchievements { achievements, error in
+    
+    // reset achievements for testing purpose
+    func resetAchievements() {
+        GKAchievement.resetAchievements { error in
             if let error = error {
-                print("Error loading achievements: \(error.localizedDescription)")
-            } else if let achievements = achievements {
-                DispatchQueue.main.async {
-                    self.achievements = achievements
-                    print("Loaded achievements: \(achievements)")
-                }
+                print("Error resetting achievements: \(error.localizedDescription)")
+            } else {
+                print("Achievements reset successfully!")
             }
         }
     }
