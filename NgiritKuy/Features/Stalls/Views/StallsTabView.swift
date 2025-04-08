@@ -77,19 +77,22 @@ struct StallView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     // Main filter button
-                    Button {
-                        showMainFilterModal = true
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "line.3.horizontal.decrease")
+                        Button {
+                            showMainFilterModal = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text("Filter")
+                                    .foregroundStyle(.primary)
+                                Image(systemName: "line.3.horizontal.decrease")
+                            }
+                            .font(.headline)
+                            .frame(height: 20)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.systemGray6))
+                            .clipShape(Capsule())
                         }
-                        .font(.headline)
-                        .frame(height: 20)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color(.systemGray6))
-                        .clipShape(Capsule())
-                    }
+                    
                     
                     // Main filter modal
                     .sheet(isPresented: $showMainFilterModal) {
@@ -146,7 +149,7 @@ struct StallView: View {
                 .padding()
             }
             .navigationBarTitleDisplayMode(.large)
-            .navigationTitle("Stall list")
+            .navigationTitle("Food Stalls")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {

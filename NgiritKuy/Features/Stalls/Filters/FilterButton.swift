@@ -19,12 +19,12 @@ struct FilterPillButton: View {
                 .frame(height: 20)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(isActive ? Color.blue.opacity(0.1) : Color(.systemGray6))
-                .foregroundStyle(isActive ? .blue : .primary)
+                .background(isActive ? Color.accent.opacity(0.1) : Color(.systemGray6))
+                .foregroundStyle(isActive ? .accent : .primary)
                 .clipShape(Capsule())
                 .overlay(
                     Capsule()
-                        .stroke(isActive ? Color.blue : Color.clear, lineWidth: 1)
+                        .stroke(isActive ? Color.accent : Color.clear, lineWidth: 1)
                 )
         }
     }
