@@ -28,6 +28,7 @@ struct StallView: View {
     @State private var selectedArea: String?
     @State private var selectedFoodType: MenuType?
     @State private var showFavoritesOnly = false
+    @State private var showVisitedOnly = false
     
     // Modal states
     @State private var showMainFilterModal = false
@@ -100,7 +101,8 @@ struct StallView: View {
                             selectedPriceRange: $selectedPriceRange,
                             selectedArea: $selectedArea,
                             selectedFoodType: $selectedFoodType,
-                            showFavoritesOnly: $showFavoritesOnly
+                            showFavoritesOnly: $showFavoritesOnly,
+                            showVisitedOnly: $showVisitedOnly
                         )
                     }
                     
@@ -127,6 +129,22 @@ struct StallView: View {
                     ) {
                         showLocationFilterModal = true
                     }
+
+                    // Favorites filter toggle pill
+                    FilterPillButton(
+                        title: "Favorites",
+                        isActive: showFavoritesOnly
+                    ) {
+                        showFavoritesOnly.toggle()
+                    }
+                    
+                    // Favorites filter toggle pill
+                    FilterPillButton(
+                        title: "Visited",
+                        isActive: showVisitedOnly
+                    ) {
+                        showVisitedOnly.toggle()
+                    }
                     
                 }
                 .padding(.horizontal, 16)
@@ -134,19 +152,30 @@ struct StallView: View {
             }
             .background(Color(.systemBackground))
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(filteredStalls) { stall in
-                        let isFirstStall = stall.id == stalls.first?.id
-                        
-                        NavigationLink(destination: DetailStall(stall: stall)) {
-                            StallCard(stall: stall,
-                                      isEligibleForTip: isFirstStall,
-                                      tipGroup: stallTips)
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                if filteredStalls.isEmpty {
+                    VStack {
+                        Text("No food stalls found.")
+                            .font(.title3)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 100)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(filteredStalls) { stall in
+                            let isFirstStall = stall.id == stalls.first?.id
+                            
+                            NavigationLink(destination: DetailStall(stall: stall)) {
+                                StallCard(stall: stall,
+                                          isEligibleForTip: isFirstStall,
+                                          tipGroup: stallTips)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding()
                 }
-                .padding()
             }
             .navigationBarTitleDisplayMode(.large)
             .navigationTitle("Food Stalls")

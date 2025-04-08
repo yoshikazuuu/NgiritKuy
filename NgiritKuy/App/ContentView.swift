@@ -12,7 +12,6 @@ struct ContentView: View {
     @StateObject private var gameCenter = GameCenterManager.shared
 
     var body: some View {
-        TabView {
             // Foods tab
             StallView()
                 .tabItem {
@@ -26,20 +25,6 @@ struct ContentView: View {
 
                     }
                 }
-
-            // Favorites tab
-            FavoritesView()
-                .tabItem {
-                    VStack {
-                        Spacer(minLength: 20)
-                        Image(
-                            uiImage: resizeImage(
-                                UIImage(systemName: "heart.fill")!,
-                                targetSize: CGSize(width: 20, height: 27))!)
-                        Text("Favorites")
-                    }
-                }
-        }
         .onAppear {
             // reset achievements from start to debug (delete this when release)
             gameCenter.resetAchievements()

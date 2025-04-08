@@ -14,6 +14,7 @@ struct MainFilterView: View {
     @Binding var selectedArea: String?
     @Binding var selectedFoodType: MenuType?
     @Binding var showFavoritesOnly: Bool
+    @Binding var showVisitedOnly: Bool
 //    @Binding var sortByNearest: Bool
 //    @Binding var sortByCheapest: Bool
     
@@ -23,9 +24,10 @@ struct MainFilterView: View {
         NavigationStack {
             Form {
                 // Favorites filter
-//                Section("Show Only") {
-//                    Toggle("Favorites", isOn: $showFavoritesOnly)
-//                }
+                Section("Show Only") {
+                    Toggle("Favorites", isOn: $showFavoritesOnly)
+                    Toggle("Visited", isOn: $showVisitedOnly)
+                }
                 
                 // Sort options
 //                Section("Sort By") {
