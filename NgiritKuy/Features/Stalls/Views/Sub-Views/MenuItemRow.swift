@@ -39,12 +39,11 @@ struct MenuItemRow: View {
                         .font(.footnote)
                         .foregroundColor(.gray)
                         .lineLimit(2)
+                    Text("\(Int(menu.price)).000")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
                 }
                 Spacer()
-
-                Text("\(Int(menu.price)).000")
-                    .font(.headline)
-                    .fontWeight(.bold)
                 Button(action: onToggleFavorite) {
                     Image(systemName: menu.isFavorite ? "heart.fill" : "heart")
                         .foregroundStyle(.red)
