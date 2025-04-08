@@ -58,7 +58,10 @@ struct StallCard: View {
                     Spacer()
                     Button(action: {
                         stall.isFavorite.toggle()
+                        
+                        //Make the task run in the background because this function makes the UI Freeze
                         AchievementTracker.shared.updateAchievements(context: modelContext)
+                        
                     }) {
                         Image(
                             systemName: stall.isFavorite

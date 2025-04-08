@@ -84,7 +84,7 @@ struct DetailStall: View {
                     Button(action: {
                         stall.isVisited.toggle()
                         AchievementTracker.shared.updateAchievements(
-                            context: modelContext)
+                            context: modelContext);
                     }) {
                         HStack {
                             Image(
