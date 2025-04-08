@@ -60,14 +60,7 @@ struct StallCard: View {
                         .lineLimit(1)
                     Spacer()
                     Button(action: {
-                        stall.isFavorite.toggle()
-                        // Consider invalidating the FavoriteTip if needed after interaction
-                        // FavoriteTip().invalidate(reason: .actionPerformed)
-                        
-                        //Make the task run in the background because this function makes the UI Freeze
-                        AchievementTracker.shared.updateAchievements(
-                            context: modelContext)
-                        
+                        stall.toggleFavorite()
                     }) {
                         Image(
                             systemName: stall.isFavorite
