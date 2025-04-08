@@ -10,7 +10,9 @@ import MapKit
 
 struct DetailStall: View {
     let stall: Stall
+    
     @Environment(\.modelContext) private var modelContext
+    @State private var cachedSortedMenu: [FoodMenu] = []
 
     var body: some View {
         ScrollView {
@@ -157,36 +159,37 @@ struct DetailStall: View {
                 Divider()
 
                 // Menu Section
-                Text("Menu")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .padding(.horizontal)
-
-                ForEach(
-                    sortedMenu
-                ) { menu in
-                    MenuItemRow(menu: menu) {
-                        toggleFavorite(for: menu.id)
+                VStack(alignment: .leading) {
+                    Text("Menu")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .padding(.horizontal)
+                    
+                    // Use LazyVStack instead of ForEach directly
+                    LazyVStack(spacing: 2) {
+                        ForEach(stall.menu) { menu in
+                            MenuItemRow(menu: menu) {
+                                toggleFavorite(for: menu.id)
+                            }
+                        }
                     }
-                    .padding(.bottom, 2)  // Add small spacing between rows
                 }
-
             }
         }
         .navigationTitle(stall.name)
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    // Computed property for the sorted menu.
-    private var sortedMenu: [FoodMenu] {
-        stall.menu.sorted { item1, item2 in
-            if item1.isFavorite != item2.isFavorite {
-                return item1.isFavorite
-            } else {
-                return item1.price < item2.price
-            }
-        }
-    }
+//    // Replace sortedMenu computed property with this:
+//    private var sortedMenu: [FoodMenu] {
+//        stall.menu.sorted { item1, item2 in
+//            if item1.isFavorite != item2.isFavorite {
+//                return item1.isFavorite
+//            } else {
+//                return item1.price < item2.price
+//            }
+//        }
+//    }
 
     // Function to toggle the favorite status for a specific menu item
     private func toggleFavorite(for menuID: UUID) {

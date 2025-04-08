@@ -9,12 +9,17 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
-// Enhanced LocationManager with better status reporting
+// Update LocationManager with debouncing
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
     @Published var currentLocation: CLLocation?
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
     @Published var locationError: String?
+    
+    // Distance caching
+    private var distanceCache: [String: String] = [:]
+    private var lastLocationUpdate = Date()
+    private let updateThreshold: TimeInterval = 5 // Only update every 5 seconds
     
     override init() {
         super.init()
@@ -58,14 +63,60 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        // Only update if sufficient time has passed
+        let now = Date()
+        if now.timeIntervalSince(lastLocationUpdate) < updateThreshold, currentLocation != nil {
+            return
+        }
+        
+        lastLocationUpdate = now
+        
         if let location = locations.last {
-            print("📍 Location updated: \(location.coordinate.latitude), \(location.coordinate.longitude)")
-            currentLocation = location
+            // Update on a background thread to avoid UI stuttering
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                self?.currentLocation = location
+                DispatchQueue.main.async {
+                    // Publish the changes on main thread after the work is done
+                    self?.objectWillChange.send()
+                }
+            }
         }
     }
     
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("📍 Location error: \(error.localizedDescription)")
-        locationError = error.localizedDescription
+    // Cache calculated distances to avoid recalculating constantly
+    func cachedDistance(for stallId: UUID, userLocation: CLLocation, stallLocation: CLLocation) -> String {
+        let cacheKey = "\(stallId.uuidString)-\(userLocation.coordinate.latitude.rounded(toPlaces: 5))-\(userLocation.coordinate.longitude.rounded(toPlaces: 5))"
+        
+        if let cached = distanceCache[cacheKey] {
+            return cached
+        }
+        
+        let distanceInMeters = userLocation.distance(from: stallLocation)
+        let distanceString: String
+        
+        if distanceInMeters < 1000 {
+            distanceString = "\(Int(distanceInMeters))m away"
+        } else {
+            let distanceInKm = distanceInMeters / 1000
+            distanceString = String(format: "%.1f km away", distanceInKm)
+        }
+        
+        // Cache the result
+        distanceCache[cacheKey] = distanceString
+        
+        // Clear old cache entries if too many
+        if distanceCache.count > 100 {
+            distanceCache.removeAll()
+        }
+        
+        return distanceString
+    }
+}
+
+// Helper extension for rounding
+extension Double {
+    func rounded(toPlaces places: Int) -> Double {
+        let divisor = pow(10.0, Double(places))
+        return (self * divisor).rounded() / divisor
     }
 }
