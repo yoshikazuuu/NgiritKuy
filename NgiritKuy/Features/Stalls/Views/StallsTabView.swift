@@ -61,7 +61,10 @@ struct StallView: View {
             // Favorites filter
             let favoriteMatches = !showFavoritesOnly || stall.isFavorite
             
-            return areaMatches && priceMatches && foodTypeMatches && favoriteMatches
+            // Favorites filter
+            let visitedMatches = !showVisitedOnly || stall.isVisited
+            
+            return areaMatches && priceMatches && foodTypeMatches && favoriteMatches && visitedMatches
         }
         
         return result
