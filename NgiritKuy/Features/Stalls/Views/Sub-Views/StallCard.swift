@@ -66,6 +66,7 @@ struct StallCard: View {
                         )
                         .foregroundStyle(.red)
                     }
+                    .sensoryFeedback(.success, trigger: stall.isFavorite)
 
                 }
                 VStack(alignment: .leading) {

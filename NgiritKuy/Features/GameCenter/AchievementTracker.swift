@@ -138,6 +138,7 @@ final class AchievementTracker: ObservableObject {
         required: Double
     ) {
         let progress = min(100, (current / required) * 100)
+        
         GameCenterManager.shared.reportAchievement(
             identifier: identifier,
             percentComplete: progress)
