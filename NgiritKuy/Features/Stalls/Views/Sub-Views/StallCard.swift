@@ -7,20 +7,24 @@
 
 import SwiftUI
 import CoreLocation
+import TipKit // Import TipKit here
 
 struct StallCard: View {
     let stall: Stall
+    let isEligibleForTip: Bool
+    let tipGroup: TipGroup     
+
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.modelContext) private var modelContext
     @StateObject private var locationManager = LocationManager()
     @State private var distance: String = "Calculating..."
 
-    // Calculate the width of the image
     private let totalHorizontalPadding: CGFloat = 20 * 2
     private let imageHeight: CGFloat = 120
 
     var body: some View {
         VStack(alignment: .leading) {
+            // --- Image Section ---
             ZStack(alignment: .topTrailing) {
                 if let imageData = stall.image,
                     let uiImage = UIImage(data: imageData)
@@ -48,7 +52,6 @@ struct StallCard: View {
                         }
                 }
             }
-
             VStack(alignment: .leading) {
                 HStack {
                     Text(stall.name)
@@ -58,9 +61,12 @@ struct StallCard: View {
                     Spacer()
                     Button(action: {
                         stall.isFavorite.toggle()
+                        // Consider invalidating the FavoriteTip if needed after interaction
+                        // FavoriteTip().invalidate(reason: .actionPerformed)
                         
                         //Make the task run in the background because this function makes the UI Freeze
-                        AchievementTracker.shared.updateAchievements(context: modelContext)
+                        AchievementTracker.shared.updateAchievements(
+                            context: modelContext)
                         
                     }) {
                         Image(
@@ -69,7 +75,10 @@ struct StallCard: View {
                         )
                         .foregroundStyle(.red)
                     }
-
+                    .popoverTip(
+                        isEligibleForTip ? (tipGroup.currentTip as? FavoriteTip): nil,
+                        arrowEdge: .bottom
+                    )
                 }
                 VStack(alignment: .leading) {
                     HStack {
@@ -94,8 +103,14 @@ struct StallCard: View {
         )
         .cornerRadius(12)
         .shadow(radius: 3)
+        .popoverTip(
+            isEligibleForTip ? (tipGroup.currentTip as? StallDetailTip) : nil,
+            arrowEdge: .bottom
+        )
         .onAppear {
-            print("📌 Stall location: \(stall.area?.latitude ?? 0), \(stall.area?.longitude ?? 0)")
+            print(
+                "📌 Stall location: \(stall.area?.latitude ?? 0), \(stall.area?.longitude ?? 0)"
+            )
             locationManager.startUpdatingLocation()
             calculateDistance()
         }
@@ -105,20 +120,21 @@ struct StallCard: View {
             }
         }
     }
-    
+
+    // calculateDistance and getStallLocation functions remain the same
     private func calculateDistance() {
         guard let userLocation = locationManager.currentLocation else {
             distance = "Waiting for location"
             return
         }
-        
+
         guard let stallLocation = getStallLocation() else {
             distance = "No stall location"
             return
         }
-        
+
         let distanceInMeters = userLocation.distance(from: stallLocation)
-        
+
         if distanceInMeters < 1000 {
             distance = "\(Int(distanceInMeters))m away"
         } else {
@@ -126,7 +142,7 @@ struct StallCard: View {
             distance = String(format: "%.1f km away", distanceInKm)
         }
     }
-    
+
     private func getStallLocation() -> CLLocation? {
         guard let area = stall.area,
               let latitude = area.latitude,
@@ -134,13 +150,16 @@ struct StallCard: View {
             print("⚠️ Missing location data for stall: \(stall.name)")
             return nil
         }
-        
-        // Ensure the coordinates are valid
-        guard CLLocationCoordinate2DIsValid(CLLocationCoordinate2D(latitude: latitude, longitude: longitude)) else {
-            print("⚠️ Invalid coordinates for stall: \(stall.name) - \(latitude), \(longitude)")
+
+        guard CLLocationCoordinate2DIsValid(
+            CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
+        else {
+            print(
+                "⚠️ Invalid coordinates for stall: \(stall.name) - \(latitude), \(longitude)"
+            )
             return nil
         }
-        
+
         print("📍 Stall location found: \(latitude), \(longitude)")
         return CLLocation(latitude: latitude, longitude: longitude)
     }

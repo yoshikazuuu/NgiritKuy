@@ -41,6 +41,7 @@ struct ContentView: View {
                 }
         }
         .onAppear {
+            gameCenter.resetAchievements()
             if !gameCenter.isAuthenticated {
                 Task {
                     gameCenter.authenticatePlayer()

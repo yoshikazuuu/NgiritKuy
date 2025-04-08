@@ -1,17 +1,20 @@
 import SwiftData
 import SwiftUI
+import TipKit
 
 @main
 struct NgiritKuyApp: App {
-
     let sharedModelContainer: ModelContainer
 
     init() {
-        // Define the schema (ensure GOPArea is removed if it's an Enum)
+        // #DEBUG (REMOVE LATER)
+        try? Tips.resetDatastore()
+        try? Tips.configure()
+
         let schema = Schema([
             Stall.self,
             FoodMenu.self,
-                // GOPArea.self, // REMOVE THIS if GOPArea is an Enum
+            GOPArea.self,
         ])
         let modelConfiguration = ModelConfiguration(
             schema: schema,
@@ -96,6 +99,7 @@ let previewContainer: ModelContainer = {
             configurations: [modelConfiguration]
         )
         print("Seeding preview (in-memory) container...")
+
         // Use the same seedData function, but with the preview context
         Task { [container] in  // Capture container here too for consistency
             await MainActor.run {  // Explicitly run on MainActor
@@ -114,5 +118,15 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
             .modelContainer(previewContainer)
+            .task {
+                #if DEBUG
+                    try? Tips.resetDatastore()
+                #endif
+                try? Tips.configure([
+                    .displayFrequency(.immediate),
+                    .datastoreLocation(.applicationDefault),
+                ])
+                print("TipKit configured for Preview")
+            }
     }
 }

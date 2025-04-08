@@ -8,6 +8,7 @@
 import SwiftData
 import SwiftUI
 import CoreLocation
+import TipKit
 
 struct StallView: View {
     @Environment(\.modelContext) private var modelContext
@@ -16,6 +17,11 @@ struct StallView: View {
     @Query private var areas: [GOPArea] // Assuming GOPArea is used elsewhere
 
     @State private var isShowingAchievement = false
+    @State private var stallTips = TipGroup(.ordered) {
+        AchievementTip()
+        StallDetailTip()
+        FavoriteTip()
+    }
     
     // Filter states
     @State private var selectedPriceRange: PriceRange?
@@ -127,8 +133,12 @@ struct StallView: View {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(filteredStalls) { stall in
+                        let isFirstStall = stall.id == stalls.first?.id
+                        
                         NavigationLink(destination: DetailStall(stall: stall)) {
-                            StallCard(stall: stall)
+                            StallCard(stall: stall,
+                                      isEligibleForTip: isFirstStall,
+                                      tipGroup: stallTips)
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
@@ -154,6 +164,7 @@ struct StallView: View {
                         }
                     } label: {
                         Image(systemName: "star.fill")
+                            .popoverTip(stallTips.currentTip as? AchievementTip, arrowEdge: .top)
                     }
                     // Optional: Disable button based on Game Center status
                     // .disabled(!gameCenter.isGameCenterEnabled)
@@ -198,4 +209,21 @@ struct StallView: View {
         let stallLocation = CLLocation(latitude: latitude, longitude: longitude)
         return userLocation.distance(from: stallLocation)
     }
+}
+
+#Preview {
+    StallView()
+        .environment(\.modelContext, ModelContext(previewContainer))
+        .environmentObject(GameCenterManager.shared)
+        .task {
+            #if DEBUG
+                try? Tips.resetDatastore()
+            #endif
+            try? Tips.configure([
+                .displayFrequency(.immediate),
+                .datastoreLocation(.applicationDefault),
+            ])
+            print("TipKit configured for Preview")
+        }
+
 }
