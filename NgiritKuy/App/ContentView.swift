@@ -13,7 +13,7 @@ struct ContentView: View {
 
     var body: some View {
             // Foods tab
-            StallView()
+            StallsTabView()
                 .tabItem {
                     VStack {
                         Spacer(minLength: 20)
@@ -26,8 +26,6 @@ struct ContentView: View {
                     }
                 }
         .onAppear {
-            // reset achievements from start to debug (delete this when release)
-            gameCenter.resetAchievements()
             if !gameCenter.isAuthenticated {
                 Task {
                     gameCenter.authenticatePlayer()
