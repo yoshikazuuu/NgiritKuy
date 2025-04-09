@@ -8,7 +8,6 @@ struct NgiritKuyApp: App {
 
     init() {
         // #DEBUG (REMOVE LATER)
-        try? Tips.resetDatastore()
         try? Tips.configure()
 
         let schema = Schema([
@@ -16,6 +15,7 @@ struct NgiritKuyApp: App {
             FoodMenu.self,
             GOPArea.self,
         ])
+        
         let modelConfiguration = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: false
@@ -41,7 +41,7 @@ struct NgiritKuyApp: App {
             // 3. Check and Seed Data AFTER container creation
             // Explicitly capture the 'container' constant in the Task's capture list
             // This avoids capturing 'self'
-            Task { [container] in  // <-- FIX: Explicit capture list
+            Task { [container] in
                 // Explicitly run on MainActor for safety with ModelContext
                 await MainActor.run {
                     Self.seedInitialDataIfNeeded(
@@ -66,7 +66,6 @@ struct NgiritKuyApp: App {
     // Helper function to check if seeding is needed
     @MainActor
     static func seedInitialDataIfNeeded(context: ModelContext) {
-        // Check if data already exists (e.g., by fetching one Stall)
         let descriptor = FetchDescriptor<Stall>()
         do {
             let count = try context.fetchCount(descriptor)

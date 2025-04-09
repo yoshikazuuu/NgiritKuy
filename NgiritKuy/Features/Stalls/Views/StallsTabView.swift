@@ -113,18 +113,22 @@ struct StallsTabView: View {
                     showFavoritesOnly: $showFavoritesOnly,
                     showVisitedOnly: $showVisitedOnly
                 )
+                .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showPriceFilterModal) {
                 PriceFilterView(selectedPriceRange: $selectedPriceRange)
                     .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showLocationFilterModal) {
                 LocationFilterView(selectedArea: $selectedArea)
                     .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showCuisineFilterModal) {
                 CuisineFilterView(selectedFoodType: $selectedFoodType)
                     .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
             }
             // --- Filtering Updates ---
             .onChange(of: stalls) { _, _ in updateFilteredStalls() }
