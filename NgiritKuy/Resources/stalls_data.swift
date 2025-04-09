@@ -1,5 +1,5 @@
 //
-//  GOPArea.t
+//  GOPArea.swift
 //  NgiritKuy
 //
 //  Created by Jerry Febriano on 07/04/25.
@@ -1171,7 +1171,7 @@ let pondokBaksoPakJokoStallData: StallData = (
     3.0,  // Min Price: Kerupuk 3k
     25.0,  // Max Price: All Bakso variants 25k
     17.6,  // Average Price (calculated from listed items: (25*6 + 8 + 10 + 5 + 3) / 10)
-    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placehr
+    GOPArea.foodcourt,  // Assuming GOPArea based on typical layout, placehr
     "PONDOK BAKSO PAK JOKO",
     [
         (
@@ -1223,7 +1223,7 @@ let ayamRemekGoangStallData: StallData = (
     6.0,  // Min Price: Air Mineral 6k
     37.0,  // Max Price: Nasi Goang Ayam Remek Matah/Goang 37k
     19.62,  // Average Price (calculated from Paket, Ala Carte, Snack, Drink items)
-    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placehr
+    GOPArea.foodcourt,  // Assuming GOPArea based on typical layout, placehr
     "AYAM REMEK GOANG",
     [
         // Paket
@@ -1368,7 +1368,7 @@ let keKeiStallData: StallData = (
     5.0,  // Min Price: Air Mineral 5k
     88.0,  // Max Price: Iga Sapi BBQ 88k
     32.13,  // Average Price (calculated from all listed items across images)
-    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placehr
+    GOPArea.foodcourt,  // Assuming GOPArea based on typical layout, placehr
     "KE KEI",
     [
         // Fridge Menu / Left Vertical Menu (Consistent across images)
@@ -1720,7 +1720,7 @@ let warungKitaStallData: StallData = (
     8.0,  // Estimated Min Price: Es Teh Manis 8k
     50.0,  // Estimated Max Price: Sate Kambing 50k
     25.07,  // Estimated Average Price (calculated from estimated item prices)
-    GOPArea.gop1,  // Assuming GOPArea based on typical layout, placehr
+    GOPArea.foodcourt,  // Assuming GOPArea based on typical layout, placehr
     "WARUNG KITA",
     [
         // Estimated Menu Items based on visuals
