@@ -73,7 +73,7 @@ struct NgiritKuyApp: App {
                 // No data found, proceed with seeding
                 print("Persistent store is empty. Seeding initial data...")
                 // Call the actual seeding function (defined in Utils.swift)
-                seedData(context, allFoodCourtStalls)
+                seedData(context, smallFoodCourtStalls)
                 print("Finished seeding persistent store.")
             } else {
                 // Data already exists

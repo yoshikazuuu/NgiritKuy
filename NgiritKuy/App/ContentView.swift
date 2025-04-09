@@ -26,11 +26,11 @@ struct ContentView: View {
                     }
                 }
         .onAppear {
-            if !gameCenter.isAuthenticated {
-                Task {
-                    gameCenter.authenticatePlayer()
-                }
-            }
+//            if !gameCenter.isAuthenticated {
+//                Task {
+//                    gameCenter.authenticatePlayer()
+//                }
+//            }
         }
     }
 }

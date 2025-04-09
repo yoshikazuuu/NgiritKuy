@@ -27,6 +27,7 @@ struct StallsTabView: View {
     @State private var showPriceFilterModal = false
     @State private var showLocationFilterModal = false
     @State private var showCuisineFilterModal = false
+    @State private var showAchievementAuthModal = false
     
     // Query for all stalls (sorted by name)
     @Query var stalls: [Stall]
@@ -92,14 +93,28 @@ struct StallsTabView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    AchievementButton(
-                        gameCenter: gameCenter,
-                        isShowingAchievement: $isShowingAchievement,
-                        tip: stallTips.currentTip as? AchievementTip
-                    )
+                    Button {
+                        if gameCenter.isAuthenticated {
+                            isShowingAchievement = true
+                        } else {
+                            // Attempt authentication if not already authenticated
+                            showAchievementAuthModal = true
+                            
+                        }
+                    } label: {
+                        Image("gamecenter.achievement")
+                            .renderingMode(.template)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 34)
+                            .foregroundColor(.accent)
+                            .popoverTip(stallTips.currentTip as? AchievementTip, arrowEdge: .top)
+                            
+                    }
+                    // Optional: Disable button based on Game Center status
+                    // .disabled(!gameCenter.isGameCenterEnabled)
                 }
             }
-            // --- Achievement Sheet ---
             .sheet(isPresented: $isShowingAchievement) {
                 GameCenterAchievementsView(isPresented: $isShowingAchievement)
                     .environmentObject(gameCenter)
@@ -108,6 +123,7 @@ struct StallsTabView: View {
             .sheet(isPresented: $showMainFilterModal) {
                 MainFilterView(
                     selectedPriceRange: $selectedPriceRange,
+                    .presentationDetents([.medium])
                     selectedArea: $selectedArea,
                     selectedFoodType: $selectedFoodType,
                     showFavoritesOnly: $showFavoritesOnly,
