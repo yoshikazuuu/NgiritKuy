@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GameKit
+import UIKit
 
 class GameCenterManager: ObservableObject {
     static let shared = GameCenterManager()
@@ -114,6 +115,10 @@ class GameCenterManager: ObservableObject {
             // print("⚠️ Game Center: Cannot report achievement. Not authenticated.")
             return
         }
+        
+        // Check if we've already processed this achievement locally.
+        let key = "\(identifier)AchievementIsUnlocked"
+        let isUnlocked = UserDefaults.standard.bool(forKey: key)
 
         let achievement = GKAchievement(identifier: identifier)
         // Ensure percent is clamped between 0 and 100
@@ -129,8 +134,16 @@ class GameCenterManager: ObservableObject {
             } else {
                 // Don't log success for every report, can be noisy.
                 // Only log if percentComplete is 100?
-                if achievement.percentComplete >= 100.0 {
-                     print("✅ Achievement '\(identifier)' reported as complete!")
+                if achievement.percentComplete >= 100.0 && !isUnlocked {
+                    print("✅ Achievement '\(identifier)' reported as complete!")
+                    
+                    // Trigger extra custom feedback since it's a newly unlocked achievement.
+                    AudioServicesPlaySystemSound(1000)
+                    let feedbackGenerator = UINotificationFeedbackGenerator()
+                    feedbackGenerator.notificationOccurred(.success)
+
+                    // Mark this achievement as unlocked so the feedback won't run again.
+                    UserDefaults.standard.set(true, forKey: key)
                 }
             }
         }
@@ -171,3 +184,4 @@ class GameCenterManager: ObservableObject {
         }
     }
 }
+

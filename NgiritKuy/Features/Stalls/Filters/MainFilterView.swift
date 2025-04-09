@@ -61,6 +61,7 @@ struct MainFilterView: View {
                         }
                     }
                     .contentShape(Rectangle())
+                    .sensoryFeedback(.selection, trigger: selectedPriceRange)
                     .onTapGesture {
                         selectedPriceRange = nil
                     }
@@ -92,6 +93,7 @@ struct MainFilterView: View {
                         }
                     }
                     .contentShape(Rectangle())
+                    .sensoryFeedback(.selection, trigger: selectedArea)
                     .onTapGesture {
                         selectedArea = nil
                     }
@@ -123,6 +125,7 @@ struct MainFilterView: View {
                         }
                     }
                     .contentShape(Rectangle())
+                    .sensoryFeedback(.selection, trigger: selectedFoodType)
                     .onTapGesture {
                         selectedFoodType = nil
                     }
@@ -146,6 +149,8 @@ struct MainFilterView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
+                        let feedbackGenerator = UINotificationFeedbackGenerator()
+                        feedbackGenerator.notificationOccurred(.success)
                         dismiss()
                     }
                     .fontWeight(.bold)

@@ -9,6 +9,7 @@ import CoreLocation
 import SwiftData
 import SwiftUI
 import TipKit
+import GameKit
 
 struct StallsTabView: View {
     @Environment(\.modelContext) private var modelContext
@@ -107,6 +108,9 @@ struct StallsTabView: View {
                             // Attempt authentication if not already authenticated
                             showAchievementAuthModal = true
                         }
+                        
+                        
+                        
                     } label: {
                         Image("gamecenter.achievement")
                             .renderingMode(.template)
@@ -119,7 +123,9 @@ struct StallsTabView: View {
                                 arrowEdge: .top
                             )
                     }
+                    .sensoryFeedback(.success, trigger: (isShowingAchievement || showAchievementAuthModal))
                 }
+                
                 // Reset Menu (leading) with three options
                 ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
@@ -135,6 +141,7 @@ struct StallsTabView: View {
                     } label: {
                         Image(systemName: "gearshape.fill")
                             .foregroundColor(.primary)
+                            .opacity(0)
                     }
                 }
             }
@@ -382,7 +389,12 @@ struct StallsTabView: View {
     
     /// Reset user defaults (for example, clearing Game Center auth flag).
     private func resetUserDefaults() {
-        UserDefaults.standard.removeObject(forKey: "hasAuthenticatedWithGameCenter")
+        
+        if let appDomain = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: appDomain)
+            UserDefaults.standard.synchronize()
+        }
+        
         print("User defaults reset successfully.")
     }
 }

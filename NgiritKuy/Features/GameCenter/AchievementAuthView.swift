@@ -33,7 +33,7 @@ struct AchievementAuthView: View {
                 Button("Sign in with Game Center") {
                     if !gameCenter.isAuthenticated {
                         gameCenter.authenticatePlayer()
-
+                        dismiss()
                     }
                 }
                 Spacer()

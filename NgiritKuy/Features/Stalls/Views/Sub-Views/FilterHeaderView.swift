@@ -14,6 +14,7 @@ struct FilterHeaderView: View {
     @Binding var selectedFoodType: MenuType?
     @Binding var showFavoritesOnly: Bool
     @Binding var showVisitedOnly: Bool
+    @State var isClicked: Bool = false
     
     let onMainFilterTapped: () -> Void
     let onPriceFilterTapped: () -> Void
@@ -24,7 +25,10 @@ struct FilterHeaderView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                Button(action: onMainFilterTapped) {
+                Button {
+                    onMainFilterTapped()
+                    isClicked.toggle()
+                } label: {
                     HStack(spacing: 6) {
                         Text("Filter")
                             .foregroundStyle(.primary)
@@ -38,6 +42,7 @@ struct FilterHeaderView: View {
                     .clipShape(Capsule())
                 }
                 .popoverTip(stallTips.currentTip as? FilterTip, arrowEdge: .top)
+                .sensoryFeedback(.success, trigger: isClicked)
                 
                 // Active filters
                 if let range = selectedPriceRange {

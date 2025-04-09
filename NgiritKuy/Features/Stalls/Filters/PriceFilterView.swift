@@ -39,6 +39,7 @@ struct PriceFilterView: View {
                     }
                 }
                 .contentShape(Rectangle())
+                .sensoryFeedback(.selection, trigger: selectedPriceRange)
                 .onTapGesture {
                     selectedPriceRange = nil
                     dismiss()
@@ -49,6 +50,8 @@ struct PriceFilterView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
+                        let feedbackGenerator = UINotificationFeedbackGenerator()
+                        feedbackGenerator.notificationOccurred(.success)
                         dismiss()
                     }
                 }
