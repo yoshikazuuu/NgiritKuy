@@ -63,26 +63,39 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // Only update if sufficient time has passed
         let now = Date()
-        if now.timeIntervalSince(lastLocationUpdate) < updateThreshold, currentLocation != nil {
+        // Check if enough time has passed OR if we don't have a location yet (for the first update)
+        guard now.timeIntervalSince(lastLocationUpdate) >= updateThreshold || currentLocation == nil else {
+            // Not enough time passed and we already have a location, skip update
             return
         }
-        
-        lastLocationUpdate = now
-        
-        if let location = locations.last {
-            // Update on a background thread to avoid UI stuttering
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                self?.currentLocation = location
-                DispatchQueue.main.async {
-                    // Publish the changes on main thread after the work is done
-                    self?.objectWillChange.send()
-                }
-            }
+        lastLocationUpdate = now // Update timestamp since we're proceeding
+
+        // --- Get Last Location ---
+        guard let newLocation = locations.last else {
+            // No location data in the update array
+            return
+        }
+
+        // --- Update on Main Thread ---
+        // Dispatch the update of the @Published property to the main queue
+        DispatchQueue.main.async { [weak self] in
+            // Safely unwrap self
+            guard let self = self else { return }
+
+            // Assign the new location. This mutation on the main thread
+            // will automatically trigger objectWillChange.send() because
+            // currentLocation is @Published.
+            self.currentLocation = newLocation
+
+            // Optional: Add a print statement for debugging
+             print("📍 Location updated on main thread: \(newLocation.coordinate)")
+
+            // NO NEED for explicit self.objectWillChange.send() here
+            // The assignment above handles publishing the change correctly.
         }
     }
-    
+
     // Cache calculated distances to avoid recalculating constantly
     func cachedDistance(for stallId: UUID, userLocation: CLLocation, stallLocation: CLLocation) -> String {
         let cacheKey = "\(stallId.uuidString)-\(userLocation.coordinate.latitude.rounded(toPlaces: 5))-\(userLocation.coordinate.longitude.rounded(toPlaces: 5))"
