@@ -5,39 +5,39 @@
 //  Created by Miftah Fauzy on 04/04/25.
 //
 
-import SwiftUI
-import SwiftData
-import TipKit
 import CoreLocation
+import SwiftData
+import SwiftUI
+import TipKit
 
 struct StallsTabView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var gameCenter = GameCenterManager.shared
     @StateObject private var locationManager = LocationManager()
-    
+
     // Filter states
     @State private var selectedPriceRange: PriceRange?
     @State private var selectedArea: String?
     @State private var selectedFoodType: MenuType?
     @State private var showFavoritesOnly = false
     @State private var showVisitedOnly = false
-    
+
     // Modal states for filter sheets
     @State private var showMainFilterModal = false
     @State private var showPriceFilterModal = false
     @State private var showLocationFilterModal = false
     @State private var showCuisineFilterModal = false
     @State private var showAchievementAuthModal = false
-    
+
     // Query for all stalls (sorted by name)
     @Query var stalls: [Stall]
-    
+
     // Local copy filtered for display
     @State private var displayedStalls: [Stall] = []
     @State private var isFiltering = false
     @State private var filterTask: Task<Void, Never>?
     private let filterDebounceTime: TimeInterval = 0.3
-    
+
     // Tip group for hints (TipKit)
     @State private var stallTips = TipGroup(.ordered) {
         StallDetailTip()
@@ -45,15 +45,15 @@ struct StallsTabView: View {
         FavoriteTip()
         AchievementTip()
     }
-    
+
     // Game Center Achievement state
     @State private var isShowingAchievement = false
-    
+
     init() {
         // Fetch all stalls
         _stalls = Query(sort: \Stall.name)
     }
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -71,7 +71,7 @@ struct StallsTabView: View {
                     stallTips: stallTips
                 )
                 .padding(.horizontal, 16)
-                
+
                 // --- Main Content ---
                 Group {
                     if isFiltering {
@@ -99,7 +99,7 @@ struct StallsTabView: View {
                         } else {
                             // Attempt authentication if not already authenticated
                             showAchievementAuthModal = true
-                            
+
                         }
                     } label: {
                         Image("gamecenter.achievement")
@@ -108,8 +108,10 @@ struct StallsTabView: View {
                             .aspectRatio(contentMode: .fit)
                             .frame(height: 34)
                             .foregroundColor(.accent)
-                            .popoverTip(stallTips.currentTip as? AchievementTip, arrowEdge: .top)
-                            
+                            .popoverTip(
+                                stallTips.currentTip as? AchievementTip,
+                                arrowEdge: .top)
+
                     }
                     // Optional: Disable button based on Game Center status
                     // .disabled(!gameCenter.isGameCenterEnabled)
@@ -118,6 +120,7 @@ struct StallsTabView: View {
             .sheet(isPresented: $isShowingAchievement) {
                 GameCenterAchievementsView(isPresented: $isShowingAchievement)
                     .environmentObject(gameCenter)
+                    .presentationDetents([.medium])
             }
             // --- Filter Modal Sheets ---
             .sheet(isPresented: $showMainFilterModal) {
@@ -129,7 +132,6 @@ struct StallsTabView: View {
                     showVisitedOnly: $showVisitedOnly
                 )
                 .presentationDragIndicator(.visible)
-                .presentationDetents([.medium])
             }
             .sheet(isPresented: $showPriceFilterModal) {
                 PriceFilterView(selectedPriceRange: $selectedPriceRange)
@@ -146,6 +148,10 @@ struct StallsTabView: View {
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             }
+            .sheet(isPresented: $showAchievementAuthModal) {
+                AchievementAuthView()
+                    .presentationDetents([.medium])
+            }
             // --- Filtering Updates ---
             .onChange(of: stalls) { _, _ in updateFilteredStalls() }
             .onChange(of: selectedPriceRange) { _, _ in updateFilteredStalls() }
@@ -158,7 +164,7 @@ struct StallsTabView: View {
             }
         }
     }
-    
+
     private func updateFilteredStalls() {
         // Cancel any previous filtering task
         filterTask?.cancel()
