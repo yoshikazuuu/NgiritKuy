@@ -123,13 +123,13 @@ struct StallsTabView: View {
             .sheet(isPresented: $showMainFilterModal) {
                 MainFilterView(
                     selectedPriceRange: $selectedPriceRange,
-                    .presentationDetents([.medium])
                     selectedArea: $selectedArea,
                     selectedFoodType: $selectedFoodType,
                     showFavoritesOnly: $showFavoritesOnly,
                     showVisitedOnly: $showVisitedOnly
                 )
                 .presentationDragIndicator(.visible)
+                .presentationDetents([.medium])
             }
             .sheet(isPresented: $showPriceFilterModal) {
                 PriceFilterView(selectedPriceRange: $selectedPriceRange)
