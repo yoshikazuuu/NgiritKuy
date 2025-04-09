@@ -30,14 +30,6 @@ struct NgiritKuyApp: App {
             // 2. Assign the created container to the instance property 'self'
             self.sharedModelContainer = container
 
-            // Initialize achievement tracker
-            Task { @MainActor in
-                AchievementTracker.shared.initialize(
-                    context: ModelContext(container))
-                // Initial refresh of metrics (done asynchronously)
-                AchievementTracker.shared.refreshMetrics()
-            }
-
             // 3. Check and Seed Data AFTER container creation
             // Explicitly capture the 'container' constant in the Task's capture list
             // This avoids capturing 'self'

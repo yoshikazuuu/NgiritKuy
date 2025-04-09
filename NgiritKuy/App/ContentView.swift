@@ -9,29 +9,27 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var gameCenter = GameCenterManager.shared
 
     var body: some View {
-            // Foods tab
-            StallsTabView()
-                .tabItem {
-                    VStack {
-                        Spacer(minLength: 20)
-                        Image(
-                            uiImage: resizeImage(
-                                UIImage(systemName: "fork.knife.circle.fill")!,
-                                targetSize: CGSize(width: 20, height: 27))!)
-                        Text("Stalls")
+        // Foods tab
+        StallsTabView()
+            .tabItem {
+                VStack {
+                    Spacer(minLength: 20)
+                    Image(
+                        uiImage: resizeImage(
+                            UIImage(systemName: "fork.knife.circle.fill")!,
+                            targetSize: CGSize(width: 20, height: 27))!)
+                    Text("Stalls")
 
-                    }
                 }
-        .onAppear {
-//            if !gameCenter.isAuthenticated {
-//                Task {
-//                    gameCenter.authenticatePlayer()
-//                }
-//            }
-        }
+            }
+            .onAppear {
+                AchievementTracker.shared.initialize(context: modelContext)
+                AchievementTracker.shared.refreshMetrics()
+            }
     }
 }
 
