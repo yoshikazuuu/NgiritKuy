@@ -12,7 +12,7 @@ struct AchievementTip: Tip {
     var message: Text? {
         Text("Tap the star to check your progress and access Game Center.")
     }
-    var image: Image? { Image(systemName: "star.fill") }
+    var image: Image? { Image(systemName: "trophy.circle.fill") }
     var options: [Option] { MaxDisplayCount(1) }
 }
 
@@ -32,7 +32,7 @@ struct FavoriteTip: Tip {
     var message: Text? {
         Text("Tap the heart to save this stall to your favorites list.")
     }
-    var image: Image? { Image(systemName: "heart.fill") }
+    var image: Image? { Image(systemName: "heart.circle.fill") }
     var options: [Option] { MaxDisplayCount(1) }
 }
 

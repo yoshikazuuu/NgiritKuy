@@ -37,6 +37,7 @@ struct StallView: View {
     @State private var showPriceFilterModal = false
     @State private var showLocationFilterModal = false
     @State private var showCuisineFilterModal = false
+    @State private var showAchievementAuthModal = false
     
     //filter function
     private var filteredStalls: [Stall] {
@@ -193,17 +194,18 @@ struct StallView: View {
                             isShowingAchievement = true
                         } else {
                             // Attempt authentication if not already authenticated
-                            Task {
-                                gameCenter.authenticatePlayer()
-                                // Optionally check result and show sheet immediately
-                                // if await gameCenter.authenticatePlayer() {
-                                //     isShowingAchievement = true
-                                // }
-                            }
+                            showAchievementAuthModal = true
+                            
                         }
                     } label: {
-                        Image(systemName: "star.fill")
+                        Image("gamecenter.achievement")
+                            .renderingMode(.template)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 34)
+                            .foregroundColor(.accent)
                             .popoverTip(stallTips.currentTip as? AchievementTip, arrowEdge: .top)
+                            
                     }
                     // Optional: Disable button based on Game Center status
                     // .disabled(!gameCenter.isGameCenterEnabled)
@@ -212,6 +214,7 @@ struct StallView: View {
             .sheet(isPresented: $isShowingAchievement) {
                 GameCenterAchievementsView(isPresented: $isShowingAchievement)
                     .environmentObject(gameCenter) // Pass manager to the sheet
+                    .presentationDetents([.medium])
             }
             
             // Individual filter modals
@@ -225,6 +228,10 @@ struct StallView: View {
             }
             .sheet(isPresented: $showCuisineFilterModal) {
                 CuisineFilterView(selectedFoodType: $selectedFoodType)
+                    .presentationDetents([.medium])
+            }
+            .sheet(isPresented: $showAchievementAuthModal) {
+                AchievementAuthView()
                     .presentationDetents([.medium])
             }
         }

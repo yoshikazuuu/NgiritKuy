@@ -16,7 +16,7 @@ class GameCenterManager: ObservableObject {
     @Published var achievements: [GKAchievement] = []
     
     init() {
-        authenticatePlayer()
+//        authenticatePlayer()
     }
     
     func authenticatePlayer() {
