@@ -5,25 +5,15 @@
 //  Created by Miftah Fauzy on 04/04/25.
 //
 
-import SwiftData
 import SwiftUI
-import CoreLocation
+import SwiftData
 import TipKit
+import CoreLocation
 
-struct StallView: View {
+struct StallsTabView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var gameCenter = GameCenterManager.shared
     @StateObject private var locationManager = LocationManager()
-    @Query private var stalls: [Stall]
-    @Query private var areas: [GOPArea]
-    
-    @State private var isShowingAchievement = false
-    @State private var stallTips = TipGroup(.ordered) {
-        StallDetailTip()
-        FilterTip()
-        FavoriteTip()
-        AchievementTip()
-    }
     
     // Filter states
     @State private var selectedPriceRange: PriceRange?
@@ -32,161 +22,75 @@ struct StallView: View {
     @State private var showFavoritesOnly = false
     @State private var showVisitedOnly = false
     
-    // Modal states
+    // Modal states for filter sheets
     @State private var showMainFilterModal = false
     @State private var showPriceFilterModal = false
     @State private var showLocationFilterModal = false
     @State private var showCuisineFilterModal = false
     @State private var showAchievementAuthModal = false
     
-    //filter function
-    private var filteredStalls: [Stall] {
-        let result = stalls.filter { stall in
-            // Area filter
-            let areaMatches = selectedArea == nil || stall.area?.name == selectedArea
-            
-            // Price range filter
-            let priceMatches: Bool
-            if let range = selectedPriceRange {
-                priceMatches = stall.averagePrice >= range.min && stall.averagePrice <= range.max
-            } else {
-                priceMatches = true
-            }
-            
-            // Food type filter
-            let foodTypeMatches: Bool
-            if let foodType = selectedFoodType {
-                foodTypeMatches = stall.menu.contains { $0.menuType == foodType }
-            } else {
-                foodTypeMatches = true
-            }
-            
-            // Favorites filter
-            let favoriteMatches = !showFavoritesOnly || stall.isFavorite
-            
-            // Favorites filter
-            let visitedMatches = !showVisitedOnly || stall.isVisited
-            
-            return areaMatches && priceMatches && foodTypeMatches && favoriteMatches && visitedMatches
-        }
-        
-        return result
+    // Query for all stalls (sorted by name)
+    @Query var stalls: [Stall]
+    
+    // Local copy filtered for display
+    @State private var displayedStalls: [Stall] = []
+    @State private var isFiltering = false
+    @State private var filterTask: Task<Void, Never>?
+    private let filterDebounceTime: TimeInterval = 0.3
+    
+    // Tip group for hints (TipKit)
+    @State private var stallTips = TipGroup(.ordered) {
+        StallDetailTip()
+        FilterTip()
+        FavoriteTip()
+        AchievementTip()
     }
-
-    let columns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16),
-    ]
-
+    
+    // Game Center Achievement state
+    @State private var isShowingAchievement = false
+    
+    init() {
+        // Fetch all stalls
+        _stalls = Query(sort: \Stall.name)
+    }
+    
     var body: some View {
         NavigationStack {
-            // Filter pills row
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    // Main filter button
-                        Button {
-                            showMainFilterModal = true
-                        } label: {
-                            HStack(spacing: 6) {
-                                Text("Filter")
-                                    .foregroundStyle(.primary)
-                                Image(systemName: "line.3.horizontal.decrease")
-                            }
-                            .font(.headline)
-                            .frame(height: 20)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color(.systemGray6))
-                            .clipShape(Capsule())
-                        }
-                        .popoverTip(stallTips.currentTip as? FilterTip, arrowEdge: .top)
-                    
-                    
-                    // Main filter modal
-                    .sheet(isPresented: $showMainFilterModal) {
-                        MainFilterView(
-                            selectedPriceRange: $selectedPriceRange,
-                            selectedArea: $selectedArea,
-                            selectedFoodType: $selectedFoodType,
-                            showFavoritesOnly: $showFavoritesOnly,
-                            showVisitedOnly: $showVisitedOnly
+            VStack(spacing: 0) {
+                // --- Filter Header ---
+                FilterHeaderView(
+                    selectedPriceRange: $selectedPriceRange,
+                    selectedArea: $selectedArea,
+                    selectedFoodType: $selectedFoodType,
+                    showFavoritesOnly: $showFavoritesOnly,
+                    showVisitedOnly: $showVisitedOnly,
+                    onMainFilterTapped: { showMainFilterModal = true },
+                    onPriceFilterTapped: { showPriceFilterModal = true },
+                    onLocationFilterTapped: { showLocationFilterModal = true },
+                    onCuisineFilterTapped: { showCuisineFilterModal = true },
+                    stallTips: stallTips
+                )
+                .padding(.horizontal, 16)
+                
+                // --- Main Content ---
+                Group {
+                    if isFiltering {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if displayedStalls.isEmpty {
+                        EmptyStateView()
+                    } else {
+                        StallsGridView(
+                            stalls: displayedStalls,
+                            locationManager: locationManager,
+                            stallTips: stallTips,
+                            allStalls: stalls
                         )
                     }
-                    
-                    // Cuisine filter pill
-                    FilterPillButton(
-                        title: selectedFoodType == nil ? "Cuisine" : "Cuisine: \(selectedFoodType!.rawValue)",
-                        isActive: selectedFoodType != nil
-                    ) {
-                        showCuisineFilterModal = true
-                    }
-                    
-                    // Price filter pill
-                    FilterPillButton(
-                        title: selectedPriceRange == nil ? "Price" : "Price: \(selectedPriceRange!.displayName)",
-                        isActive: selectedPriceRange != nil
-                    ) {
-                        showPriceFilterModal = true
-                    }
-                    
-                    // Location filter pill
-                    FilterPillButton(
-                        title: selectedArea == nil ? "Location" : "Location: \(selectedArea!)",
-                        isActive: selectedArea != nil
-                    ) {
-                        showLocationFilterModal = true
-                    }
-
-                    // Favorites filter toggle pill
-                    FilterPillButton(
-                        title: "Favorites",
-                        isActive: showFavoritesOnly
-                    ) {
-                        showFavoritesOnly.toggle()
-                    }
-                    
-                    // Favorites filter toggle pill
-                    FilterPillButton(
-                        title: "Visited",
-                        isActive: showVisitedOnly
-                    ) {
-                        showVisitedOnly.toggle()
-                    }
-                    
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-            }
-            .background(Color(.systemBackground))
-            ScrollView {
-                if filteredStalls.isEmpty {
-                    VStack {
-                        Text("No food stalls found.")
-                            .font(.title3)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 100)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(filteredStalls) { stall in
-                            let isFirstStall = stall.id == stalls.first?.id
-                            
-                            NavigationLink(destination: DetailStall(stall: stall)) {
-                                StallCard(stall: stall,
-                                          isEligibleForTip: isFirstStall,
-                                          tipGroup: stallTips)
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            .environmentObject(locationManager)
-                        }
-                    }
-                    .padding()
                 }
             }
-            .navigationBarTitleDisplayMode(.large)
             .navigationTitle("Food Stalls")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -213,55 +117,169 @@ struct StallView: View {
             }
             .sheet(isPresented: $isShowingAchievement) {
                 GameCenterAchievementsView(isPresented: $isShowingAchievement)
-                    .environmentObject(gameCenter) // Pass manager to the sheet
-                    .presentationDetents([.medium])
+                    .environmentObject(gameCenter)
             }
-            
-            // Individual filter modals
+            // --- Filter Modal Sheets ---
+            .sheet(isPresented: $showMainFilterModal) {
+                MainFilterView(
+                    selectedPriceRange: $selectedPriceRange,
+                    .presentationDetents([.medium])
+                    selectedArea: $selectedArea,
+                    selectedFoodType: $selectedFoodType,
+                    showFavoritesOnly: $showFavoritesOnly,
+                    showVisitedOnly: $showVisitedOnly
+                )
+                .presentationDragIndicator(.visible)
+            }
             .sheet(isPresented: $showPriceFilterModal) {
                 PriceFilterView(selectedPriceRange: $selectedPriceRange)
                     .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showLocationFilterModal) {
                 LocationFilterView(selectedArea: $selectedArea)
                     .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showCuisineFilterModal) {
                 CuisineFilterView(selectedFoodType: $selectedFoodType)
                     .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
             }
-            .sheet(isPresented: $showAchievementAuthModal) {
-                AchievementAuthView()
-                    .presentationDetents([.medium])
+            // --- Filtering Updates ---
+            .onChange(of: stalls) { _, _ in updateFilteredStalls() }
+            .onChange(of: selectedPriceRange) { _, _ in updateFilteredStalls() }
+            .onChange(of: selectedArea) { _, _ in updateFilteredStalls() }
+            .onChange(of: selectedFoodType) { _, _ in updateFilteredStalls() }
+            .onChange(of: showFavoritesOnly) { _, _ in updateFilteredStalls() }
+            .onChange(of: showVisitedOnly) { _, _ in updateFilteredStalls() }
+            .onAppear {
+                updateFilteredStalls()
             }
         }
     }
     
-    private func calculateDistance(from userLocation: CLLocation, to stall: Stall) -> Double? {
-        guard let stallArea = stall.area,
-              let latitude = stallArea.latitude,
-              let longitude = stallArea.longitude else {
-            return nil
-        }
-        
-        let stallLocation = CLLocation(latitude: latitude, longitude: longitude)
-        return userLocation.distance(from: stallLocation)
-    }
-}
+    private func updateFilteredStalls() {
+        // Cancel any previous filtering task
+        filterTask?.cancel()
 
-#Preview {
-    StallView()
-        .environment(\.modelContext, ModelContext(previewContainer))
-        .environmentObject(GameCenterManager.shared)
-        .task {
-            #if DEBUG
-                try? Tips.resetDatastore()
-            #endif
-            try? Tips.configure([
-                .displayFrequency(.immediate),
-                .datastoreLocation(.applicationDefault),
-            ])
-            print("TipKit configured for Preview")
+        // Create a new task for filtering
+        filterTask = Task {
+            // Set filtering state
+            await MainActor.run { isFiltering = true }
+
+            // Debounce - small delay to avoid rapid consecutive filters
+            try? await Task.sleep(for: .seconds(filterDebounceTime))
+
+            // Check for cancellation after delay
+            if Task.isCancelled { return }
+
+            // Build predicate for non-relationship filters
+            var predicateFilters: [Predicate<Stall>] = []
+
+            if let areaName = selectedArea {
+                predicateFilters.append(
+                    #Predicate<Stall> { stall in
+                        stall.area?.name == areaName
+                    })
+            }
+
+            if let range = selectedPriceRange {
+                let minPrice = range.min
+                let maxPrice = range.max
+                if maxPrice.isInfinite {
+                    predicateFilters.append(
+                        #Predicate<Stall> { stall in
+                            stall.averagePrice >= minPrice
+                        })
+                } else {
+                    predicateFilters.append(
+                        #Predicate<Stall> { stall in
+                            stall.averagePrice >= minPrice
+                                && stall.averagePrice <= maxPrice
+                        })
+                }
+            }
+
+            if showFavoritesOnly {
+                predicateFilters.append(
+                    #Predicate<Stall> { stall in
+                        stall.isFavorite == true
+                    })
+            }
+
+            if showVisitedOnly {
+                predicateFilters.append(
+                    #Predicate<Stall> { stall in
+                        stall.isVisited == true
+                    })
+            }
+
+            // Combine predicates
+            let finalPredicate: Predicate<Stall>
+            if predicateFilters.isEmpty {
+                finalPredicate = #Predicate<Stall> { _ in true }
+            } else {
+                var combined = predicateFilters[0]
+                for i in 1..<predicateFilters.count {
+                    let current = combined
+                    let next = predicateFilters[i]
+                    combined = #Predicate<Stall> { stall in
+                        current.evaluate(stall) && next.evaluate(stall)
+                    }
+                }
+                finalPredicate = combined
+            }
+
+            // Check for cancellation again
+            if Task.isCancelled { return }
+
+            // Create fetch descriptor
+            var fetchDescriptor = FetchDescriptor<Stall>(
+                predicate: finalPredicate)
+            fetchDescriptor.sortBy = [SortDescriptor(\Stall.name)]
+
+            do {
+                // Get shared context reference to use on background
+                let context = modelContext
+
+                // Perform fetch on background
+                let filtered = try await Task.detached(priority: .userInitiated)
+                {
+                    let allStalls = try context.fetch(fetchDescriptor)
+
+                    // Apply cuisine filter if needed
+                    if let cuisineType = await selectedFoodType {
+                        return allStalls.filter { stall in
+                            stall.menu.contains { menu in
+                                menu.menuType == cuisineType
+                            }
+                        }
+                    }
+                    return allStalls
+                }.value
+
+                // Check for cancellation before updating UI
+                if Task.isCancelled { return }
+
+                // Update UI on main thread
+                await MainActor.run {
+                    displayedStalls = filtered
+                    isFiltering = false
+                    print(
+                        "Filtered to \(filtered.count) stalls (cuisine: \(selectedFoodType?.rawValue ?? "none"))"
+                    )
+                }
+            } catch {
+                if !Task.isCancelled {
+                    await MainActor.run {
+                        print("Error filtering stalls: \(error)")
+                        displayedStalls = []
+                        isFiltering = false
+                    }
+                }
+            }
         }
+    }
 
 }
