@@ -16,7 +16,7 @@ struct StallCard: View {
 
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var locationManager = LocationManager()
+    @EnvironmentObject private var locationManager: LocationManager
     @State private var distance: String = "Calculating..."
     @State private var hasCalculatedDistance = false
 
@@ -53,7 +53,7 @@ struct StallCard: View {
                         }
                 }
             }
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 5) {
                 HStack {
                     Text(stall.name)
                         .font(.headline)
@@ -76,70 +76,93 @@ struct StallCard: View {
                         arrowEdge: .bottom
                     )
                 }
-                VStack(alignment: .leading) {
+                
+                HStack {
+                    Image(systemName: "face.smiling.inverse")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+
+                    Text("Get full for just \(Int(stall.minimumPrice))K")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                
+                
                     HStack {
-                        Image(systemName: "location.fill")
+                        Image(systemName: "figure.walk")
                             .font(.caption)
                             .foregroundStyle(.orange)
                         Text(distance)
                             .font(.caption)
                             .foregroundStyle(.gray)
                     }
-                }
-                Text("Harga mulai Rp\(Int(stall.averagePrice)).000")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+                
             }
             .padding(10)
         }
         .background(
-                    colorScheme == .dark
-                    ? Color(.secondarySystemBackground)
-                    : Color.white
-                )
-                .cornerRadius(12)
-                .shadow(radius: 3)
-                .popoverTip(
-                    isEligibleForTip ? (tipGroup.currentTip as? StallDetailTip) : nil,
-                    arrowEdge: .bottom
-                )
-                .onAppear {
-                    // Only start location updates and distance calculation if not already done
-                    if !hasCalculatedDistance {
-                        locationManager.startUpdatingLocation()
-                        calculateDistance()
-                    }
-                }
-                .onChange(of: locationManager.currentLocation) { _, newLocation in
-                    if newLocation != nil && !hasCalculatedDistance {
-                        calculateDistance()
-                    }
-                }
-            }
-
-    private func calculateDistance() {
-        Task(priority: .userInitiated) {
-            guard let userLocation = locationManager.currentLocation else {
-                distance = "Waiting for location"
-                return
-            }
-
-            guard let stallLocation = getStallLocation() else {
-                distance = "No stall location"
-                return
-            }
-
-            let distanceString = locationManager.cachedDistance(
-                for: stall.id,
-                userLocation: userLocation,
-                stallLocation: stallLocation
-            )
-
-            await MainActor.run {
-                distance = distanceString
-                hasCalculatedDistance = true
+            colorScheme == .dark
+                ? Color(.secondarySystemBackground)
+                : Color.white
+        )
+        .cornerRadius(12)
+        .shadow(radius: 3)
+        .popoverTip(
+            isEligibleForTip ? (tipGroup.currentTip as? StallDetailTip) : nil,
+            arrowEdge: .bottom
+        )
+        .onAppear {
+            calculateDistance()
+        }
+        .onChange(of: locationManager.currentLocation) { _, newLocation in
+            if newLocation != nil {
+                calculateDistance()
             }
         }
+    }
+
+    private func calculateDistance() {
+        // Use the injected locationManager
+        guard let userLocation = locationManager.currentLocation else {
+            // Handle case where location isn't available yet from shared manager
+            if locationManager.authorizationStatus == .denied
+                || locationManager.authorizationStatus == .restricted
+            {
+                distance = "Location denied"
+            } else if locationManager.authorizationStatus == .notDetermined {
+                distance = "Needs permission"
+            } else {
+                distance = "Waiting..."  // Or keep "Calculating..."
+            }
+            // Don't set hasCalculatedDistance = true here if location is missing
+            return
+        }
+
+        guard let stallLocation = getStallLocation() else {
+            distance = "No stall location"
+            hasCalculatedDistance = true  // Mark as calculated (even if failed)
+            return
+        }
+
+        // Use the shared locationManager's cache method
+        let distanceString = locationManager.cachedDistance(
+            for: stall.id,
+            userLocation: userLocation,
+            stallLocation: stallLocation
+        )
+
+        // Update UI on main thread
+        // Use Task for async context if needed, but MainActor.run is often simpler here
+        DispatchQueue.main.async {
+            self.distance = distanceString
+            self.hasCalculatedDistance = true  // Mark as calculated successfully
+        }
+
+        // --- Alternative using Task ---
+        // Task { @MainActor in
+        //     self.distance = distanceString
+        //     self.hasCalculatedDistance = true
+        // }
     }
 
     private func getStallLocation() -> CLLocation? {

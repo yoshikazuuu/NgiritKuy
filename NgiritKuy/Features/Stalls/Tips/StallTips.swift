@@ -16,7 +16,6 @@ struct AchievementTip: Tip {
     var options: [Option] { MaxDisplayCount(1) }
 }
 
-// Tip for the Stall Card (Second Tip)
 struct StallDetailTip: Tip {
     var title: Text { Text("Stall Details") }
     var message: Text? {
@@ -28,12 +27,20 @@ struct StallDetailTip: Tip {
     var options: [Option] { MaxDisplayCount(1) }
 }
 
-// Tip for the Favorite Button (Third Tip)
 struct FavoriteTip: Tip {
     var title: Text { Text("Add to Favorites") }
     var message: Text? {
         Text("Tap the heart to save this stall to your favorites list.")
     }
     var image: Image? { Image(systemName: "heart.fill") }
+    var options: [Option] { MaxDisplayCount(1) }
+}
+
+struct FilterTip: Tip {
+    var title: Text { Text("Filter Stalls") }
+    var message: Text? {
+        Text("Use the filter button to narrow down your search for stalls.")
+    }
+    var image: Image? { Image(systemName: "line.horizontal.3.decrease.circle.fill") }
     var options: [Option] { MaxDisplayCount(1) }
 }

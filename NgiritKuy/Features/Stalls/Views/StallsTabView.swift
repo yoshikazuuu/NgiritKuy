@@ -13,14 +13,16 @@ import TipKit
 struct StallView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var gameCenter = GameCenterManager.shared
+    @StateObject private var locationManager = LocationManager()
     @Query private var stalls: [Stall]
-    @Query private var areas: [GOPArea] // Assuming GOPArea is used elsewhere
-
+    @Query private var areas: [GOPArea]
+    
     @State private var isShowingAchievement = false
     @State private var stallTips = TipGroup(.ordered) {
-        AchievementTip()
         StallDetailTip()
+        FilterTip()
         FavoriteTip()
+        AchievementTip()
     }
     
     // Filter states
@@ -96,6 +98,7 @@ struct StallView: View {
                             .background(Color(.systemGray6))
                             .clipShape(Capsule())
                         }
+                        .popoverTip(stallTips.currentTip as? FilterTip, arrowEdge: .top)
                     
                     
                     // Main filter modal
@@ -175,6 +178,7 @@ struct StallView: View {
                                           tipGroup: stallTips)
                             }
                             .buttonStyle(PlainButtonStyle())
+                            .environmentObject(locationManager)
                         }
                     }
                     .padding()
@@ -224,14 +228,6 @@ struct StallView: View {
                     .presentationDetents([.medium])
             }
         }
-        // Optional: Attempt authentication when the view appears
-        // .onAppear {
-        //     if !gameCenter.isAuthenticated {
-        //         Task {
-        //             await gameCenter.authenticatePlayer()
-        //         }
-        //     }
-        // }
     }
     
     private func calculateDistance(from userLocation: CLLocation, to stall: Stall) -> Double? {
