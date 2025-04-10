@@ -141,9 +141,6 @@ struct StallsTabView: View {
                         Button("Reset User Defaults", role: .destructive) {
                             showUserDefaultsResetConfirmation = true
                         }
-                        Button("Reset TipKit", role: .destructive) {
-                            resetTipKit()
-                        }
                     } label: {
                         Image(systemName: "gearshape.fill")
                             .foregroundColor(.primary)
@@ -444,21 +441,5 @@ struct StallsTabView: View {
         }
 
         print("User defaults reset successfully.")
-    }
-
-    func resetTipKit() {
-        do {
-            try Tips.resetDatastore()
-            print("TipKit datastore reset successfully. Tips will show again.")
-            // Reinitialize the tip group so that it doesn’t hold on to the old state.
-            stallTips = TipGroup(.ordered) {
-                StallDetailTip()
-                FilterTip()
-                FavoriteTip()
-                AchievementTip()
-            }
-        } catch {
-            print("Error resetting TipKit datastore: \(error)")
-        }
     }
 }
