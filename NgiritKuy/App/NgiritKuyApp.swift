@@ -8,7 +8,11 @@ struct NgiritKuyApp: App {
 
     init() {
         // #DEBUG (REMOVE LATER)
-        try? Tips.configure()
+        try? Tips.resetDatastore()
+        try? Tips.configure([
+            .displayFrequency(.immediate),
+            .datastoreLocation(.applicationDefault)
+        ])
 
         let schema = Schema([
             Stall.self,

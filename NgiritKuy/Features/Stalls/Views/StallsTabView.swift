@@ -6,45 +6,46 @@
 //
 
 import CoreLocation
+import GameKit
 import SwiftData
 import SwiftUI
 import TipKit
-import GameKit
 
 struct StallsTabView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var gameCenter = GameCenterManager.shared
     @StateObject private var locationManager = LocationManager()
-    
+
     // Filter states
     @State private var selectedPriceRange: PriceRange?
     @State private var selectedArea: String?
     @State private var selectedFoodType: MenuType?
     @State private var showFavoritesOnly = false
     @State private var showVisitedOnly = false
-    
+
     // Modal states for filter sheets
     @State private var showMainFilterModal = false
     @State private var showPriceFilterModal = false
     @State private var showLocationFilterModal = false
     @State private var showCuisineFilterModal = false
     @State private var showAchievementAuthModal = false
-    
+
     // Confirmation dialog states for reset actions
     @State private var showUserProgressResetConfirmation = false
     @State private var showAchievementResetConfirmation = false
     @State private var showUserDefaultsResetConfirmation = false
-    
+
     // Query for all stalls (sorted by name)
     @Query var stalls: [Stall]
-    
+
     // Local copy filtered for display
     @State private var displayedStalls: [Stall] = []
     @State private var isFiltering = false
     @State private var filterTask: Task<Void, Never>?
     private let filterDebounceTime: TimeInterval = 0.3
-    @State private var lastFilterCriteria: (PriceRange?, String?, MenuType?, Bool, Bool)?
-    
+    @State private var lastFilterCriteria:
+        (PriceRange?, String?, MenuType?, Bool, Bool)?
+
     // Tip group for hints (TipKit)
     @State private var stallTips = TipGroup(.ordered) {
         StallDetailTip()
@@ -52,15 +53,15 @@ struct StallsTabView: View {
         FavoriteTip()
         AchievementTip()
     }
-    
+
     // Game Center Achievement state
     @State private var isShowingAchievement = false
-    
+
     init() {
         // Fetch all stalls sorted by name
         _stalls = Query(sort: \Stall.name)
     }
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -78,7 +79,7 @@ struct StallsTabView: View {
                     stallTips: stallTips
                 )
                 .padding(.horizontal, 16)
-                
+
                 // --- Main Content ---
                 Group {
                     if isFiltering {
@@ -109,9 +110,7 @@ struct StallsTabView: View {
                             // Attempt authentication if not already authenticated
                             showAchievementAuthModal = true
                         }
-                        
-                        
-                        
+
                     } label: {
                         Image("gamecenter.achievement")
                             .renderingMode(.template)
@@ -124,9 +123,12 @@ struct StallsTabView: View {
                                 arrowEdge: .top
                             )
                     }
-                    .sensoryFeedback(.success, trigger: (isShowingAchievement || showAchievementAuthModal))
+                    .sensoryFeedback(
+                        .success,
+                        trigger: (isShowingAchievement
+                            || showAchievementAuthModal))
                 }
-                
+
                 // Reset Menu (leading) with three options
                 ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
@@ -138,6 +140,9 @@ struct StallsTabView: View {
                         }
                         Button("Reset User Defaults", role: .destructive) {
                             showUserDefaultsResetConfirmation = true
+                        }
+                        Button("Reset TipKit", role: .destructive) {
+                            resetTipKit()
                         }
                     } label: {
                         Image(systemName: "gearshape.fill")
@@ -183,35 +188,47 @@ struct StallsTabView: View {
                     .presentationDetents([.medium])
             }
             // --- Confirmation Dialogs ---
-            .confirmationDialog("Reset All User Progress",
-                                  isPresented: $showUserProgressResetConfirmation,
-                                  titleVisibility: .visible) {
+            .confirmationDialog(
+                "Reset All User Progress",
+                isPresented: $showUserProgressResetConfirmation,
+                titleVisibility: .visible
+            ) {
                 Button("Reset All User Progress", role: .destructive) {
                     resetAllUserProgress()
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This will clear all your progress—including favorites, visited markers, and all achievement metrics.")
+                Text(
+                    "This will clear all your progress—including favorites, visited markers, and all achievement metrics."
+                )
             }
-            .confirmationDialog("Reset Achievements",
-                                  isPresented: $showAchievementResetConfirmation,
-                                  titleVisibility: .visible) {
+            .confirmationDialog(
+                "Reset Achievements",
+                isPresented: $showAchievementResetConfirmation,
+                titleVisibility: .visible
+            ) {
                 Button("Reset Achievements", role: .destructive) {
                     resetAchievements()
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This will reset your achievements on Game Center and locally.")
+                Text(
+                    "This will reset your achievements on Game Center and locally."
+                )
             }
-            .confirmationDialog("Reset User Defaults",
-                                  isPresented: $showUserDefaultsResetConfirmation,
-                                  titleVisibility: .visible) {
+            .confirmationDialog(
+                "Reset User Defaults",
+                isPresented: $showUserDefaultsResetConfirmation,
+                titleVisibility: .visible
+            ) {
                 Button("Reset User Defaults", role: .destructive) {
                     resetUserDefaults()
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This will clear all persistent user defaults (such as Game Center authentication flags).")
+                Text(
+                    "This will clear all persistent user defaults (such as Game Center authentication flags)."
+                )
             }
             // --- Filtering Updates ---
             .onChange(of: stalls) { _, _ in updateFilteredStalls() }
@@ -225,22 +242,25 @@ struct StallsTabView: View {
             }
         }
     }
-    
+
     // MARK: - Filtering
-    
+
     private func updateFilteredStalls() {
         // Build the current filter criteria tuple
         let currentCriteria: (PriceRange?, String?, MenuType?, Bool, Bool) =
-            (selectedPriceRange, selectedArea, selectedFoodType, showFavoritesOnly, showVisitedOnly)
-        
+            (
+                selectedPriceRange, selectedArea, selectedFoodType,
+                showFavoritesOnly, showVisitedOnly
+            )
+
         // If the criteria haven't changed, skip filtering
         if let last = lastFilterCriteria, last == currentCriteria {
             return
         }
-        
+
         // Save the new criteria for later comparisons.
         lastFilterCriteria = currentCriteria
-        
+
         // Cancel any previous task.
         filterTask?.cancel()
         filterTask = Task {
@@ -251,11 +271,11 @@ struct StallsTabView: View {
                     isFiltering = true
                 }
             }
-            
+
             // Wait for a debounce delay (this prevents multiple rapid updates)
             try? await Task.sleep(for: .seconds(filterDebounceTime))
             if Task.isCancelled { return }
-            
+
             // Build predicate filters
             var predicateFilters: [Predicate<Stall>] = []
             if let areaName = selectedArea {
@@ -277,8 +297,8 @@ struct StallsTabView: View {
                 } else {
                     predicateFilters.append(
                         #Predicate<Stall> { stall in
-                            stall.averagePrice >= minPrice &&
-                            stall.averagePrice <= maxPrice
+                            stall.averagePrice >= minPrice
+                                && stall.averagePrice <= maxPrice
                         }
                     )
                 }
@@ -311,13 +331,15 @@ struct StallsTabView: View {
                 }
                 finalPredicate = combined
             }
-            
-            var fetchDescriptor = FetchDescriptor<Stall>(predicate: finalPredicate)
+
+            var fetchDescriptor = FetchDescriptor<Stall>(
+                predicate: finalPredicate)
             fetchDescriptor.sortBy = [SortDescriptor(\Stall.name)]
-            
+
             do {
                 let context = modelContext
-                let filtered = try await Task.detached(priority: .userInitiated) {
+                let filtered = try await Task.detached(priority: .userInitiated)
+                {
                     let allStalls = try context.fetch(fetchDescriptor)
                     if let cuisineType = await selectedFoodType {
                         return allStalls.filter { stall in
@@ -332,7 +354,9 @@ struct StallsTabView: View {
                 await MainActor.run {
                     displayedStalls = filtered
                     isFiltering = false
-                    print("Filtered to \(filtered.count) stalls (cuisine: \(selectedFoodType?.rawValue ?? "none"))")
+                    print(
+                        "Filtered to \(filtered.count) stalls (cuisine: \(selectedFoodType?.rawValue ?? "none"))"
+                    )
                 }
             } catch {
                 if !Task.isCancelled {
@@ -346,9 +370,8 @@ struct StallsTabView: View {
         }
     }
 
-    
     // MARK: - Reset Functions
-    
+
     /// Reset everything related to user progress including progress metrics,
     /// stall favorites/visited, and food menu favorites.
     private func resetAllUserProgress() {
@@ -374,7 +397,7 @@ struct StallsTabView: View {
             } catch {
                 print("Error resetting user progress: \(error)")
             }
-            
+
             // 2. Reset all Stall objects: clear favorites and visited markers.
             let stallDescriptor = FetchDescriptor<Stall>()
             do {
@@ -388,7 +411,7 @@ struct StallsTabView: View {
             } catch {
                 print("Error resetting stalls: \(error)")
             }
-            
+
             // 3. Reset all FoodMenu objects (favorite flag).
             let menuDescriptor = FetchDescriptor<FoodMenu>()
             do {
@@ -401,25 +424,41 @@ struct StallsTabView: View {
             } catch {
                 print("Error resetting food menus: \(error)")
             }
-            
+
             AchievementTracker.shared.refreshMetrics()
         }
     }
-    
+
     /// Reset achievements by invoking Game Center's reset mechanism.
     private func resetAchievements() {
         GameCenterManager.shared.resetAchievements()
         AchievementTracker.shared.refreshMetrics()
     }
-    
+
     /// Reset user defaults (for example, clearing Game Center auth flag).
     private func resetUserDefaults() {
-        
+
         if let appDomain = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: appDomain)
             UserDefaults.standard.synchronize()
         }
-        
+
         print("User defaults reset successfully.")
+    }
+
+    func resetTipKit() {
+        do {
+            try Tips.resetDatastore()
+            print("TipKit datastore reset successfully. Tips will show again.")
+            // Reinitialize the tip group so that it doesn’t hold on to the old state.
+            stallTips = TipGroup(.ordered) {
+                StallDetailTip()
+                FilterTip()
+                FavoriteTip()
+                AchievementTip()
+            }
+        } catch {
+            print("Error resetting TipKit datastore: \(error)")
+        }
     }
 }
