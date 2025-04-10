@@ -43,6 +43,7 @@ struct StallsTabView: View {
     @State private var isFiltering = false
     @State private var filterTask: Task<Void, Never>?
     private let filterDebounceTime: TimeInterval = 0.3
+    @State private var lastFilterCriteria: (PriceRange?, String?, MenuType?, Bool, Bool)?
     
     // Tip group for hints (TipKit)
     @State private var stallTips = TipGroup(.ordered) {
@@ -228,12 +229,34 @@ struct StallsTabView: View {
     // MARK: - Filtering
     
     private func updateFilteredStalls() {
+        // Build the current filter criteria tuple
+        let currentCriteria: (PriceRange?, String?, MenuType?, Bool, Bool) =
+            (selectedPriceRange, selectedArea, selectedFoodType, showFavoritesOnly, showVisitedOnly)
+        
+        // If the criteria haven't changed, skip filtering
+        if let last = lastFilterCriteria, last == currentCriteria {
+            return
+        }
+        
+        // Save the new criteria for later comparisons.
+        lastFilterCriteria = currentCriteria
+        
+        // Cancel any previous task.
         filterTask?.cancel()
         filterTask = Task {
-            await MainActor.run { isFiltering = true }
+            // Optionally, only set isFiltering to true if no results are already available.
+            await MainActor.run {
+                // If you already have filtered results, you might want to avoid showing the progress view.
+                if displayedStalls.isEmpty {
+                    isFiltering = true
+                }
+            }
+            
+            // Wait for a debounce delay (this prevents multiple rapid updates)
             try? await Task.sleep(for: .seconds(filterDebounceTime))
             if Task.isCancelled { return }
             
+            // Build predicate filters
             var predicateFilters: [Predicate<Stall>] = []
             if let areaName = selectedArea {
                 predicateFilters.append(
@@ -288,9 +311,10 @@ struct StallsTabView: View {
                 }
                 finalPredicate = combined
             }
-            if Task.isCancelled { return }
+            
             var fetchDescriptor = FetchDescriptor<Stall>(predicate: finalPredicate)
             fetchDescriptor.sortBy = [SortDescriptor(\Stall.name)]
+            
             do {
                 let context = modelContext
                 let filtered = try await Task.detached(priority: .userInitiated) {
@@ -321,6 +345,7 @@ struct StallsTabView: View {
             }
         }
     }
+
     
     // MARK: - Reset Functions
     
