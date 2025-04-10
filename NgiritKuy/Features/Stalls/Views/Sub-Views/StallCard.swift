@@ -69,7 +69,7 @@ struct StallCard: View {
                         )
                         .foregroundStyle(.red)
                     }
-                    .sensoryFeedback(.success, trigger: stall.isFavorite)
+                    .sensoryFeedback(.increase, trigger: stall.isFavorite)
                     .popoverTip(
                         isEligibleForTip
                             ? (tipGroup.currentTip as? FavoriteTip) : nil,

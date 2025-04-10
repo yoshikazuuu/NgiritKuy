@@ -39,6 +39,7 @@ struct CuisineFilterView: View {
                     }
                 }
                 .contentShape(Rectangle())
+                .sensoryFeedback(.selection, trigger: selectedFoodType)
                 .onTapGesture {
                     selectedFoodType = nil
                     dismiss()
@@ -49,6 +50,8 @@ struct CuisineFilterView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
+                        let feedbackGenerator = UINotificationFeedbackGenerator()
+                        feedbackGenerator.notificationOccurred(.success)
                         dismiss()
                     }
                 }

@@ -12,8 +12,14 @@ struct FilterPillButton: View {
     let isActive: Bool
     let action: () -> Void
     
+    @State var isClicked: Bool = false
+    
     var body: some View {
-        Button(action: action) {
+        
+        Button{
+            action()
+            isClicked.toggle()
+        } label: {
             Text(title)
                 .font(.subheadline)
                 .frame(height: 20)
@@ -27,5 +33,6 @@ struct FilterPillButton: View {
                         .stroke(isActive ? Color.accent : Color.clear, lineWidth: 1)
                 )
         }
+        .sensoryFeedback(.success, trigger: isClicked)
     }
 }

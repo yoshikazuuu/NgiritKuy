@@ -42,6 +42,7 @@ struct LocationFilterView: View {
                     }
                 }
                 .contentShape(Rectangle())
+                .sensoryFeedback(.selection, trigger: selectedArea)
                 .onTapGesture {
                     selectedArea = nil
                     dismiss()
@@ -52,6 +53,8 @@ struct LocationFilterView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
+                        let feedbackGenerator = UINotificationFeedbackGenerator()
+                        feedbackGenerator.notificationOccurred(.success)
                         dismiss()
                     }
                 }

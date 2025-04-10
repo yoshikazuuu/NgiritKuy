@@ -51,7 +51,7 @@ struct MenuItemRow: View {
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
-                .sensoryFeedback(.success, trigger: menu.isFavorite)
+                .sensoryFeedback(.increase, trigger: menu.isFavorite)
             }
         }
         .padding(.horizontal)
